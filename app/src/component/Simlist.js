@@ -7,7 +7,7 @@ import {
     faMobileScreenButton, faFileExcel, faPenToSquare, faTrashCan, faCircleXmark, faNoteSticky, faFloppyDisk
 } from '@fortawesome/free-solid-svg-icons'
 export class Simlist extends Component {
-    constructor(){
+    constructor() {
         super();
         this.state = {
             variables: {
@@ -22,161 +22,110 @@ export class Simlist extends Component {
         document.querySelector('.sub-container').style.display = 'none';
     }
     tickAllCheckbox = () => {
-        const tmp = {...this.state}
+        const tmp = { ...this.state }
         document.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
             checkbox.checked = tmp.variables.checkbox;
         })
-        this.setState(prevState=>({
-            variables :{
-                checkbox: prevState.variables.checkbox==true?false:true
+        this.setState(prevState => ({
+            variables: {
+                checkbox: prevState.variables.checkbox == true ? false : true
             }
         }))
     }
     render() {
         return (
-            <section>
-                <div className="container">
-                    <div className="row">
-                        <div className="col-lg-2">
-                            <div className="sidebar">
-                                <div className="sidebar-user">
-                                    <div className="sidebar-user-symbol">
-                                        <FontAwesomeIcon icon={faCircleUser} style={{ color: "#ffffff", fontSize: "5rem" }} />
-                                    </div>
-                                    <div className="sidebar-user-text">Xin chào người dùng</div>
-                                </div>
-                                <div className="sidebar-selections">
-                                    <div className="selection" id="mailbox">
-                                        <div className="selection-symbol">
-                                            <FontAwesomeIcon icon={faEnvelope} style={{ color: "#ffffff", fontSize: "2rem" }} />
-                                        </div>
-                                        <div className="selection-text">Hộp thư</div>
-                                    </div>
-                                    <div className="selection" id="config">
-                                        <div className="selection-symbol">
-                                            <i
-                                                className="fa-solid fa-toolbox"
-                                                style={{ color: "#ffffff" }}
-                                            />
-                                            <FontAwesomeIcon icon={faToolbox} style={{ color: "#ffffff", fontSize: "2rem" }} />
-                                        </div>
-                                        <div className="selection-text">Cấu hình</div>
-                                    </div>
-                                    <div className="selection" id="simlist">
-                                        <div className="selection-symbol">
-                                            <i className="fa-solid fa-list" style={{ color: "#ffffff" }} />
-                                            <FontAwesomeIcon icon={faList} style={{ color: "#ffffff", fontSize: "2rem" }} />
-                                        </div>
-                                        <div className="selection-text">Danh sách sim</div>
-                                    </div>
-                                    <div className="selection" id="process">
-                                        <div className="selection-symbol">
-                                            <i
-                                                className="fa-solid fa-microchip"
-                                                style={{ color: "#ffffff" }}
-                                            />
-                                            <FontAwesomeIcon icon={faMicrochip} style={{ color: "#ffffff", fontSize: "2rem" }} />
-                                        </div>
-                                        <div className="selection-text">Tiến trình</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-lg-10">
-                            <div className="header">
-                                <div className="header-symbol">
-                                    <FontAwesomeIcon icon={faList} style={{ color: "#ffffff", fontSize: "2rem", padding: "10px" }} />
-                                </div>
-                                <div className="header-text">Danh sách sim</div>
-                            </div>
-                            <main>
-                                <div className="searcher d-flex">
-                                    <form
-                                        action=""
-                                        method="post"
-                                        className="d-flex justify-content-between"
-                                    >
-                                        <div className="searcher-inputTel d-flex align-items-center">
-                                            <FontAwesomeIcon icon={faMobileScreenButton} style={{
-                                                position: "absolute",
-                                                left: "18px",
-                                                color:"#24c79f" 
-
-                                            }} />
-                                            <input
-                                                type="text"
-                                                name="listName"
-                                                id="listName"
-                                                placeholder="Nhập tên danh sách...."
-                                            />
-                                        </div>
-                                        <div className="uploadFile">
-                                            <label htmlFor="file-upload" className="custom-file-upload">
-                                                <FontAwesomeIcon icon={faFileExcel} style={{ color: "#24c79f" }} />
-                                                {" "}
-                                                Tải file excel tại đây
-                                            </label>
-                                            <input id="file-upload" type="file" />
-                                        </div>
-                                        <button>Thêm mới</button>
-                                    </form>
-                                </div>
-                                <table className="mt-4 table">
-                                    <thead className="text-center">
-                                        <tr>
-                                            <th>
-                                                <button onClick={this.tickAllCheckbox}>
-                                                    Tất cả
-                                                </button>
-                                            </th>
-                                            <th>STT</th>
-                                            <th>Tên danh sách</th>
-                                            <th>Số lượng sim</th>
-                                            <th>Ghi chú</th>
-                                            <th>Tác vụ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-center">
-                                        <tr>
-                                            <td>
-                                                <input type="checkbox" name="" id="list-1" />
-                                            </td>
-                                            <td>1</td>
-                                            <td>Danh sách 1</td>
-                                            <td>10</td>
-                                            <td>Quan trọng</td>
-                                            <td>
-                                                <button className="action-btn edit-btn" id="edit-1" onClick={this.showAddWindow}>
-                                                    <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
-                                                </button>
-                                                <button className="action-btn remove-btn" id="remove-1">
-                                                    <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <input type="checkbox" name="" id="list-1" />
-                                            </td>
-                                            <td>1</td>
-                                            <td>Danh sách 1</td>
-                                            <td>10</td>
-                                            <td>Quan trọng</td>
-                                            <td>
-                                                <button className="action-btn edit-btn" id="edit-1" onClick={this.showAddWindow}>
-                                                    <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
-                                                </button>
-                                                <button className="action-btn remove-btn" id="remove-1">
-                                                    <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </main>
-                        </div>
+            <div className="simlist-container">
+                <div className="header">
+                    <div className="header-symbol">
+                        <FontAwesomeIcon icon={faList} style={{ color: "#ffffff", fontSize: "2rem", padding: "10px" }} />
                     </div>
+                    <div className="header-text">Danh sách sim</div>
                 </div>
+                <main>
+                    <div className="searcher d-flex">
+                        <form
+                            action=""
+                            method="post"
+                            className="d-flex justify-content-between"
+                        >
+                            <div className="searcher-inputTel d-flex align-items-center">
+                                <FontAwesomeIcon icon={faMobileScreenButton} style={{
+                                    position: "absolute",
+                                    left: "18px",
+                                    color: "#24c79f"
+
+                                }} />
+                                <input
+                                    type="text"
+                                    name="listName"
+                                    id="listName"
+                                    placeholder="Nhập tên danh sách...."
+                                />
+                            </div>
+                            <div className="uploadFile">
+                                <label htmlFor="file-upload" className="custom-file-upload">
+                                    <FontAwesomeIcon icon={faFileExcel} style={{ color: "#24c79f" }} />
+                                    {" "}
+                                    Tải file excel tại đây
+                                </label>
+                                <input id="file-upload" type="file" />
+                            </div>
+                            <button>Thêm mới</button>
+                        </form>
+                    </div>
+                    <table className="mt-4 table">
+                        <thead className="text-center">
+                            <tr>
+                                <th>
+                                    <button onClick={this.tickAllCheckbox}>
+                                        Tất cả
+                                    </button>
+                                </th>
+                                <th>STT</th>
+                                <th>Tên danh sách</th>
+                                <th>Số lượng sim</th>
+                                <th>Ghi chú</th>
+                                <th>Tác vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-center">
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="" id="list-1" />
+                                </td>
+                                <td>1</td>
+                                <td>Danh sách 1</td>
+                                <td>10</td>
+                                <td>Quan trọng</td>
+                                <td>
+                                    <button className="action-btn edit-btn" id="edit-1" onClick={this.showAddWindow}>
+                                        <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
+                                    </button>
+                                    <button className="action-btn remove-btn" id="remove-1">
+                                        <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="" id="list-1" />
+                                </td>
+                                <td>1</td>
+                                <td>Danh sách 1</td>
+                                <td>10</td>
+                                <td>Quan trọng</td>
+                                <td>
+                                    <button className="action-btn edit-btn" id="edit-1" onClick={this.showAddWindow}>
+                                        <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
+                                    </button>
+                                    <button className="action-btn remove-btn" id="remove-1">
+                                        <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </main>
                 <div className="sub-container" style={{ display: "none" }}>
                     <div className="editCard">
                         <div className="editCard-delete">
@@ -259,7 +208,7 @@ export class Simlist extends Component {
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
         )
     }
 }

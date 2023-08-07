@@ -3,71 +3,7 @@ $secondary-color : #1b2a47;
 $green-color : #24c79f;
 $yellow-color : #D0DC45;
 $red-color : #CC3F3F;
-html,body{
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 100%;
-    width: 100%;
-    background-color: $primary-color !important;
-}
-section,.container, .row,.col-lg-2{
-    max-width: 100vw !important;
-    height: 100%;
-    width: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-.sidebar{
-    background-color: $secondary-color;
-    height: 100%;
-    width: 100%;
-    &-user{
-        width: 100%;
-        padding: 20px !important;
-        &-symbol{
-            padding: 20px;
-            text-align: center;
-            i{
-                font-size: 5rem !important;
-            }
-        }
-        &-text{
-            color: white;
-            font-size: 1.2rem;
-            text-align: center;
-        }
-    }
 
-    &-selections{
-        margin-top: 20px;
-        .selection{
-            display: flex;
-            padding: 20px;
-            &-symbol{
-                display: flex;
-                place-items: center;
-                i{
-                    font-size: 2rem;
-                }
-            }
-            &-text{
-                padding-left: 15px;
-                font-size: 1.3rem;
-                color: white;
-            }
-            &:hover{
-                background-color: $primary-color;
-                cursor: pointer;
-            }&:first-child{
-                background-color: $primary-color;
-            }
-        }
-    }
-
-}
-.col-lg-10{
-    padding: 30px !important;
-}
 .header{
     width: 100%;
     background-color: $secondary-color;
@@ -144,6 +80,10 @@ main{
             place-items: center;
             padding : 0 10px;
             justify-content: center;
+            .btn{
+                width: 100%;
+                border: none;
+            }
         }
     }
     table{
