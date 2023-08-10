@@ -32,14 +32,24 @@ $red-color : #CC3F3F;
         .selection{
             display: flex;
             padding: 20px;
+            transition: all 0.5s ease;
             &-symbol{
+                width: 50px;
+                aspect-ratio: 1/1;
                 display: flex;
-                place-items: center;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.5s ease;
+                border-radius: 50%;
+
                 i{
                     font-size: 2rem;
                 }
             }
             &-text{
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 padding-left: 15px;
                 font-size: 1.3rem;
                 color: white;
@@ -47,6 +57,9 @@ $red-color : #CC3F3F;
             &:hover{
                 background-color: $primary-color;
                 cursor: pointer;
+            }
+            &:hover .selection-symbol{
+                background-color: $green-color;
             }
         }
     }

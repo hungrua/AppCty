@@ -87,23 +87,83 @@ main{
         }
     }
     table{
+        table-layout: fixed;
         thead{
             tr{
+                height: 20px;
                 th{
                     background-color: $secondary-color !important ;
                     color: white !important;
                     border-top: $green-color 1px solid !important;
                     border-bottom: none !important;
+                    height: 40px;
+                }
+                .col-1 {
+                    width: 5% !important;
+                }
+                .col-2 {
+                    width: 20% !important;
+                }
+                .col-3 {
+                    width: 20% !important;
+                }
+                .col-4 {
+                    width: 20% !important;
+                }
+                .col-5 {
+                    width: 20% !important;
+                }
+                .col-6 {
+                    div{
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        &:hover{
+                            white-space: unset;
+                            overflow:auto;
+                            text-overflow: ellipsis
+                        }
+                    }
                 }
             }
         }
         tbody{
             tr{
+                height: 20px;
                 td{
                     background-color: $secondary-color !important;
                     color: white !important;
                     border-top: $green-color 1px solid !important;
                     border-bottom: none !important;
+                    height: 40px;
+                    word-wrap: break-word;
+                }
+                .col-1 {
+                    width: 5% !important;
+                }
+                .col-2 {
+                    width: 20% !important;
+                }
+                .col-3 {
+                    width:20% !important;
+                }
+                .col-4 {
+                    width: 20% !important;
+                }
+                .col-5 {
+                    width: 20% !important;
+                }
+                .col-6 {
+                    div{
+                        text-align: left;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        &:hover{
+                            cursor: pointer;
+                            white-space: unset;
+                        }
+                    }
                 }
             }
         }

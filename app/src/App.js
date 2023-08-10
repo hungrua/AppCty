@@ -17,12 +17,12 @@ function App() {
               <Sidebar />
             </div>
             <div className="col-lg-10">
-              <Routes>
-                <Route path='/mailbox' element={<Mailbox />}></Route>
+              {/* <Routes>
+                <Route path='/' element={<Mailbox />}></Route>
                 <Route path='/config' element={<Config />}></Route>
                 <Route path='/simlist' element={<Simlist />}></Route>
                 <Route path='/process' element={<Process />}></Route>
-              </Routes>
+              </Routes> */}
             </div>
           </div>
         </div>

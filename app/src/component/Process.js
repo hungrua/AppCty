@@ -2,9 +2,58 @@ import React, { Component } from 'react'
 import './sass/process.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleUser, faEnvelope, faToolbox, faList, faMicrochip, faMobileScreenButton, faMagnifyingGlass, faPowerOff, faCirclePause, faCircleMinus } from '@fortawesome/free-solid-svg-icons'
+import axios from 'axios'
+import { faMicrochip, faPowerOff, faCirclePause, faCircleMinus } from '@fortawesome/free-solid-svg-icons'
 export class Process extends Component {
+    constructor() {
+        super()
+        this.state = {
+            currentSim: {}
+        }
+        this.processData = []
+        this.pauseContinueStatus = "continue"
+    }
+    startProgress = async () => {
+        await axios.get('/api/play')
+            .then(respone => {
+                alert(respone)
+            })
+    }
+    pauseOrContinueOrFinish = async (action) => {
+        // alert(action)
+        await axios.get('/api/?action=' + action)
+            .then(respone => {
+                alert(respone)
+            })
+    }
+    fetchData = async () => {
+        var currentProcess
+        setInterval(async () => {
+            await axios.get('/api/process_current')
+                .then(respone => {
+                    if (respone.data != 'null') currentProcess = respone.data
+                })
+            if (currentProcess != null) {
+                this.setState(({
+                    currentSim: currentProcess
+                }))
+                if(this.processData.find(process => process.current_phoneNumber === currentProcess.current_phoneNumber)){
+                    this.processData.pop()
+                    this.processData.push(currentProcess)
+                }
+            }
+
+        },10*1000)
+    }
+    componentDidMount = async () => {
+        await this.fetchData()
+    }
+    componentDidUpdate = async () => {
+        await this.fetchData()
+    }
     render() {
+        const currentSim = { ...this.state.currentSim }
+        console.log(this.processData)
         return (
             <div className="process-container">
                 <div className="header">
@@ -21,7 +70,9 @@ export class Process extends Component {
                                     style={{
                                         fontSize: "2rem",
                                         color: "#24c79f"
-                                    }} />
+                                    }}
+                                    onClick={this.startProgress}
+                                />
                             </button>
                         </div>
                         <div className="col-md-4 text-center btn-container">
@@ -30,7 +81,12 @@ export class Process extends Component {
                                     style={{
                                         fontSize: "2rem",
                                         color: "#d0dc45"
-                                    }} />
+                                    }}
+                                    onClick={() => {
+                                        this.pauseContinueStatus = this.pauseContinueStatus == "continue" ? "pause" : "continue"
+                                        this.pauseOrContinueOrFinish(this.pauseContinueStatus);
+                                    }}
+                                />
                             </button>
                         </div>
                         <div className="col-md-4 text-center btn-container">
@@ -39,7 +95,11 @@ export class Process extends Component {
                                     style={{
                                         fontSize: "2rem",
                                         color: "#cc3f3f"
-                                    }} />
+                                    }}
+                                    onClick={() => {
+                                        this.pauseOrContinueOrFinish("stop");
+                                    }}
+                                />
                             </button>
                         </div>
                     </div>
@@ -50,14 +110,15 @@ export class Process extends Component {
                         <div className="progress mt-2" style={{ padding: 0 }}>
                             <div
                                 className="progress-bar"
-                                style={{ width: "75%" }}
+                                style={{ width: currentSim.process }}
                                 role="progressbar"
                                 aria-valuenow={22}
                                 aria-valuemin={0}
                                 aria-valuemax={100}
-                            />
-                            <div className="progress-text">
-                                <span>15</span> / <span>20</span>
+                            >
+                            </div>
+                            <div className="progress-text" style={{ left: currentSim.process }}>
+                                <span>{currentSim.index}</span> / <span>{currentSim.totalPhoneNumber}</span>
                             </div>
                         </div>
                     </div>
@@ -70,13 +131,20 @@ export class Process extends Component {
                                 <th>Thông báo</th>
                             </tr>
                         </thead>
-                        <tbody className="text-center">
-                            <tr>
-                                <td>1</td>
-                                <td>098756555</td>
-                                <td>Thành công</td>
-                                <td>Quan trọng</td>
-                            </tr>
+                        <tbody className="text-center" >
+                            {
+                                this.processData.map((sim, index) => {
+                                    return (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{sim.current_phoneNumber}</td>
+                                            <td>{sim.status?sim.status:"Đang gửi tin nhắn"}</td>
+                                            <td>{sim.message}</td>
+                                        </tr>
+
+                                    )
+                                })
+                            }
                         </tbody>
                     </table>
                     {/* <div class="row">

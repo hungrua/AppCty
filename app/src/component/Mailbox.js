@@ -2,19 +2,39 @@ import React, { Component } from 'react'
 import './sass/mailbox.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleUser, faEnvelope, faToolbox, faList, faMicrochip, faMobileScreenButton, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import axios  from 'axios';
+import {  faEnvelope, faMobileScreenButton, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 export class Mailbox extends Component {
 
     constructor(){
         super();
+        this.state ={
+            listMails: []
+        }
     }
+    // Effect for input
     changeToDateInput =(e)=>{
         e.target.type="date"
     }
     changeToTextInput =(e)=>{
         e.target.type="text"
     }
+    // Find by condition
+    findMailsByCondition = async (dateSend,dateReceive,receiver)=>{
+        console.log(dateSend,dateReceive,receiver)
+        await axios.get("/api/listSms?dateSend"+dateSend+"&dateReceive"+dateReceive+"&receiver"+receiver)
+            .then(response=>{
+                this.setState({
+                    listMails: response&&response.data ? response.data:[]
+                })
+            })
+    }
+    // Get the mail
+    componentDidMount = async() =>{
+        setInterval(()=> this.findMailsByCondition("","",""),10*1000)
+    }
     render() {
+        const listSms = [...this.state.listMails]
         return (
             <div className="mailBox-container">
                 <div className="header">
@@ -64,7 +84,15 @@ export class Mailbox extends Component {
                                 />
                             </div>
                             <div className="searcher-btn">
-                                <button className="btn">
+                                <button className="btn"
+                                onClick={(e)=>{
+                                    e.preventDefault();
+                                    let sentDay = document.getElementById("sentDay").value?document.getElementById("sentDay").value:""
+                                    let receiveDay = document.getElementById("receiveDay").value?document.getElementById("receiveDay").value:""
+                                    let receiver = document.getElementById("phone").value?document.getElementById("phone").value:""
+                                    this.findMailsByCondition(sentDay, receiveDay, receiver)
+                                }}  
+                                >
                                     <FontAwesomeIcon icon={faMagnifyingGlass} style={{ color: "#ffffff", }} />
                                 </button>
                             </div>
@@ -73,22 +101,44 @@ export class Mailbox extends Component {
                     <table className="mt-4 table">
                         <thead className="text-center">
                             <tr>
-                                <th>STT</th>
-                                <th>Thời gian gửi</th>
-                                <th>Thời gian nhận</th>
-                                <th>Đầu số gửi</th>
-                                <th>Đầu số nhận</th>
-                                <th>Nội dung</th>
+                                <th className='col-1'>STT</th>
+                                <th className='col-2'>Thời gian gửi</th>
+                                <th className='col-3'>Thời gian nhận</th>
+                                <th className='col-4'>Đầu số gửi</th>
+                                <th className='col-5' >Đầu số nhận</th>
+                                <th className='col-6'>Nội dung</th>
                             </tr>
                         </thead>
                         <tbody className="text-center">
                             <tr>
-                                <td>1</td>
-                                <td>21-07-2020 17:30:12</td>
-                                <td>21-07-2020 17:31:12</td>
-                                <td>FB</td>
-                                <td>0911929292</td>
-                                <td>012323 là mã xác nhận tài khoản của quý khách</td>
+                                <td className='col-1'>1</td>
+                                <td className='col-2'>21-07-2020 17:30:12</td>
+                                <td className='col-3'>21-07-2020 17:31:12</td>
+                                <td className='col-4'>FB</td>
+                                <td className='col-5'>0911929292</td>
+                                <td className='col-6' >
+                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className='col-1'>2</td>
+                                <td className='col-2'>21-07-2020 17:30:12</td>
+                                <td className='col-3'>21-07-2020 17:31:12</td>
+                                <td className='col-4'>FB</td>
+                                <td className='col-5'>0911929292</td>
+                                <td className='col-6' >
+                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className='col-1'>3</td>
+                                <td className='col-2'>21-07-2020 17:30:12</td>
+                                <td className='col-3'>21-07-2020 17:31:12</td>
+                                <td className='col-4'>FB</td>
+                                <td className='col-5'>0911929292</td>
+                                <td className='col-6' >
+                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
