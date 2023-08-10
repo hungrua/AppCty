@@ -137,7 +137,7 @@ export class Simlist extends Component {
             url: '/simlist',
             data: data
         }).then((response)=>{
-            alert(response)
+            console.log(response)
         })
         this.hideAddWindow()
         console.log(data)

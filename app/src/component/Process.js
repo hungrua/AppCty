@@ -16,14 +16,14 @@ export class Process extends Component {
     startProgress = async () => {
         await axios.get('/api/play')
             .then(respone => {
-                alert(respone)
+                console.log(respone)
             })
     }
     pauseOrContinueOrFinish = async (action) => {
         // alert(action)
         await axios.get('/api/?action=' + action)
             .then(respone => {
-                alert(respone)
+                console.log(respone)
             })
     }
     fetchData = async () => {
