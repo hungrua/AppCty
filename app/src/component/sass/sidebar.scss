@@ -28,38 +28,37 @@ $red-color : #CC3F3F;
         margin-top: 20px;
         a{
             text-decoration: none;
-        }
-        .selection{
-            display: flex;
-            padding: 20px;
-            transition: all 0.5s ease;
-            &-symbol{
-                width: 50px;
-                aspect-ratio: 1/1;
+            .selection{
                 display: flex;
-                align-items: center;
-                justify-content: center;
+                padding: 20px;
                 transition: all 0.5s ease;
-                border-radius: 50%;
-
-                i{
-                    font-size: 2rem;
+                &-symbol{
+                    width: 50px;
+                    aspect-ratio: 1/1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.5s ease;
+                    border-radius: 50%;
+                    i{
+                        font-size: 2rem;
+                    }
                 }
-            }
-            &-text{
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding-left: 15px;
-                font-size: 1.3rem;
-                color: white;
-            }
-            &:hover{
-                background-color: $primary-color;
-                cursor: pointer;
-            }
-            &:hover .selection-symbol{
-                background-color: $green-color;
+                &-text{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding-left: 15px;
+                    font-size: 1.3rem;
+                    color: white;
+                }
+                &:hover{
+                    background-color: $primary-color !important;
+                    cursor: pointer;
+                    .selection-symbol {
+                        background-color: $green-color !important;
+                    }
+                }
             }
         }
     }

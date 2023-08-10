@@ -168,7 +168,7 @@ export class Simlist extends Component {
         this.removedListSim = []
     }
     fetchData = async()=>{
-        let res = await axios.get("http://localhost:3001/listSim")
+        let res = await axios.get("/api/listsim")
         // '/api/listsim'
         this.setState({
             listSim: res && res.data ? res.data : []

@@ -38,13 +38,13 @@ main{
                 padding: 9px;
                 background-color: #152036;
             }
-            #Profile-Path,#Api-2captcha{
+            #newProfile{
                 &::-webkit-input-placeholder{
                     color: #fff;
                 }
             }
 
-            #Profile-Path,#Api-2captcha,#select-sim{
+            #Profile-Path,#newProfile,#select-sim{
                 &:focus{
                     color: #fff;
                     box-shadow: none;

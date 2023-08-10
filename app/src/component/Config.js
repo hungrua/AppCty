@@ -3,22 +3,22 @@ import './sass/config.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faToolbox, faUser, faKey, faSimCard } from '@fortawesome/free-solid-svg-icons'
+import { faToolbox, faUser, faKey, faSimCard,faPlus } from '@fortawesome/free-solid-svg-icons'
 export class Config extends Component {
     constructor(){
         super()
         this.apiKey = ""
         this.state ={
-            listSim: []
+            listSim: [],
+            listProFile:[]
         }
     }
-    addConfigInfo= async (profilePath, idListSim)=>{
-        await axios.post("/api/config?profilePath="+profilePath+"&idListSim="+idListSim)
+    addConfigInfo= async (profilePath,idListSim,newProfilePath)=>{
+        await axios.post("/api/config?profilePath="+profilePath+"&idListSim="+idListSim+"&newProfilePath="+newProfilePath)
             .then(response=>{
                 alert("Lưu cấu hình thành công")
             })
     }
-
     fillSimListSelection = async ()=>{
         var listSim;
         await axios.get("/api/config")
@@ -27,11 +27,19 @@ export class Config extends Component {
             })
         this.setState({listSim:listSim})
     }
+    fillProFileSelection = async ()=>{
+        var listProFile;
+        await axios.get("/api/profiles")
+            .then(response=>{
+                listProFile = response.data && response ? response.data: []    
+            })
+        this.setState({listProFile:listProFile})
+    }
     componentDidMount = async () =>{
-        this.fillSimListSelection()
+        // this.fillSimListSelection()
     }
     componentDidUpdate = async () =>{
-        this.fillSimListSelection()
+        // this.fillSimListSelection()
     }
     
     render() {
@@ -50,28 +58,48 @@ export class Config extends Component {
                                 htmlFor="Profile-Path"
                                 className="col-form-label back-ground-label br"
                             >
-                                <FontAwesomeIcon icon={faUser} style={{ color: "#ffffff", fontSize: 22 }} />
+                                <FontAwesomeIcon icon={faPlus} style={{ color: "#ffffff", fontSize: 22 }} />
                             </label>
                             <input
                                 type="text"
                                 className="form-control back-ground-input border border-dark"
-                                id="Profile-Path"
-                                placeholder="Nhập profile path..."
+                                id="newProfile"
+                                placeholder="Thêm mới profile tại đây...."
+                                onBlur={(e)=>{
+                                    if (e.target.value){
+                                        document.getElementById("Profile-Path").setAttribute("disabled", "true");
+                                        document.getElementById("select-sim").setAttribute("disabled", "true");
+                                    }
+                                    else{
+                                        document.getElementById("Profile-Path").removeAttribute("disabled")
+                                        document.getElementById("select-sim").removeAttribute("disabled")
+                                    }
+                                }}
                             />
                         </div>
                         <div className="form-group mb-5 d-flex ">
                             <label
-                                htmlFor="Api-2captcha"
+                                htmlFor="Profile-Path"
                                 className="col-form-label back-ground-label br"
                             >
-                                <FontAwesomeIcon icon={faKey} style={{ color: "#ffffff", fontSize: 22 }} />
+                                <FontAwesomeIcon icon={faUser} style={{ color: "#ffffff", fontSize: 22 }} />
                             </label>
-                            <input
-                                type="text"
+                            <select
                                 className="form-control back-ground-input border border-dark"
-                                id="Api-2captcha"
-                                placeholder="Nhập 2captcha APIkey"
-                            />
+                                id="Profile-Path"
+                                onBlur={(e)=>{
+                                    if(e.target.value!="") document.getElementById("newProfile").setAttribute("disabled","true")
+                                    else document.getElementById("newProfile").removeAttribute("disabled")
+                                }}
+                            >
+                                <option value="">Chọn profile tại đây...</option>
+                                <option value="ID danh sách 1">Danh sách sim 1</option>
+                                <option value="ID danh sách 2">Danh sách sim 2</option>
+                                <option value="ID danh sách 3">Danh sách sim 3</option>
+                                <option value="ID danh sách 4">Danh sách sim 4</option>
+                                <option value="ID danh sách 5">Danh sách sim 5</option>
+                            </select>
+
                         </div>
                         <div className="form-group mb-5 d-flex ">
                             <label htmlFor="" className="col-form-label back-ground-label br">
@@ -80,8 +108,13 @@ export class Config extends Component {
                             <select
                                 className="form-control back-ground-input border border-dark"
                                 id="select-sim"
+                                onBlur={(e)=>{
+                                    console.log(e.target.value)
+                                    if(e.target.value!=="") document.getElementById("newProfile").setAttribute("disabled","true")
+                                    else document.getElementById("newProfile").removeAttribute("disabled")
+                                }}
                             >
-                                <option value="null">Chọn danh sách sim</option>
+                                <option value="">Chọn danh sách sim</option>
                                 <option value="ID danh sách 1">Danh sách sim 1</option>
                                 <option value="ID danh sách 2">Danh sách sim 2</option>
                                 <option value="ID danh sách 3">Danh sách sim 3</option>
@@ -95,10 +128,16 @@ export class Config extends Component {
                                 e.preventDefault();
                                 let profilePath = document.getElementById("Profile-Path").value
                                 let idListSim = document.getElementById("select-sim").value
-                                if(!profilePath || !idListSim ){
-                                    alert("Vui lòng điền đủ thông tin")
+                                let newProfilePath = document.getElementById("newProfile").value
+                                if(newProfilePath!=null ){
+                                    this.addConfigInfo("", "", newProfilePath)
                                 }
-                                this.addConfigInfo(profilePath, idListSim)
+                                else{
+                                    if(!profilePath || !idListSim){
+                                        this.addConfigInfo(profilePath,idListSim,"")
+                                    }
+                                    else alert("Vui lòng chọn đủ thông tin")
+                                }
                             }}
                             >
                                 Lưu
