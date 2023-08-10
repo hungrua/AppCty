@@ -36,13 +36,16 @@ export class Config extends Component {
         this.setState({listProFile:listProFile})
     }
     componentDidMount = async () =>{
-        // this.fillSimListSelection()
+        await this.fillProFileSelection()
+        await this.fillSimListSelection()
     }
     componentDidUpdate = async () =>{
-        // this.fillSimListSelection()
+        await this.fillProFileSelection()
+        await this.fillSimListSelection()
     }
     
     render() {
+        const {listProFile,listSim } = {...this.state}
         return (
             <div className='config-container'>
                 <div className="header">
@@ -93,11 +96,14 @@ export class Config extends Component {
                                 }}
                             >
                                 <option value="">Chọn profile tại đây...</option>
-                                <option value="ID danh sách 1">Danh sách sim 1</option>
-                                <option value="ID danh sách 2">Danh sách sim 2</option>
-                                <option value="ID danh sách 3">Danh sách sim 3</option>
-                                <option value="ID danh sách 4">Danh sách sim 4</option>
-                                <option value="ID danh sách 5">Danh sách sim 5</option>
+                                {
+                                    listProFile.map((profile,index)=>{
+                                        return(
+                                            <option key={index} value={profile.id}>{profile.profilePath}</option>
+                                        )
+                                    })
+
+                                }
                             </select>
 
                         </div>
@@ -115,11 +121,14 @@ export class Config extends Component {
                                 }}
                             >
                                 <option value="">Chọn danh sách sim</option>
-                                <option value="ID danh sách 1">Danh sách sim 1</option>
-                                <option value="ID danh sách 2">Danh sách sim 2</option>
-                                <option value="ID danh sách 3">Danh sách sim 3</option>
-                                <option value="ID danh sách 4">Danh sách sim 4</option>
-                                <option value="ID danh sách 5">Danh sách sim 5</option>
+                                {
+                                    listSim.map((sim,index)=>{
+                                        return(
+                                            <option key={index} value={sim.id}>{sim.name}</option>
+                                        )
+                                    })
+
+                                }
                             </select>
                         </div>
                         <div className="btn-container">
@@ -130,7 +139,7 @@ export class Config extends Component {
                                 let idListSim = document.getElementById("select-sim").value
                                 let newProfilePath = document.getElementById("newProfile").value
                                 if(newProfilePath!=null ){
-                                    this.addConfigInfo("", "", newProfilePath)
+                                    this.addConfigInfo(-1, "", newProfilePath)
                                 }
                                 else{
                                     if(!profilePath || !idListSim){

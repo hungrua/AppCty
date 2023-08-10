@@ -18,10 +18,10 @@ function App() {
             </div>
             <div className="col-lg-10">
               <Routes>
-                {/* <Route path='/' element={<Mailbox />}></Route> */}
+                <Route path='/' element={<Mailbox />}></Route>
                 <Route path='/config' element={<Config />}></Route>
-                {/* <Route path='/simlist' element={<Simlist />}></Route> */}
-                {/* <Route path='/process' element={<Process />}></Route> */}
+                <Route path='/simlist' element={<Simlist />}></Route> 
+                <Route path='/process' element={<Process />}></Route>
               </Routes>
             </div>
           </div>
