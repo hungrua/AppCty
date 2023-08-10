@@ -110,36 +110,23 @@ export class Mailbox extends Component {
                             </tr>
                         </thead>
                         <tbody className="text-center">
-                            <tr>
-                                <td className='col-1'>1</td>
-                                <td className='col-2'>21-07-2020 17:30:12</td>
-                                <td className='col-3'>21-07-2020 17:31:12</td>
-                                <td className='col-4'>FB</td>
-                                <td className='col-5'>0911929292</td>
-                                <td className='col-6' >
-                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className='col-1'>2</td>
-                                <td className='col-2'>21-07-2020 17:30:12</td>
-                                <td className='col-3'>21-07-2020 17:31:12</td>
-                                <td className='col-4'>FB</td>
-                                <td className='col-5'>0911929292</td>
-                                <td className='col-6' >
-                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className='col-1'>3</td>
-                                <td className='col-2'>21-07-2020 17:30:12</td>
-                                <td className='col-3'>21-07-2020 17:31:12</td>
-                                <td className='col-4'>FB</td>
-                                <td className='col-5'>0911929292</td>
-                                <td className='col-6' >
-                                    <div>012323 là mã xác nhận tài khoản của quý khách sadasdassadasdasdasdsadsaddasd</div>
-                                </td>
-                            </tr>
+                            {
+                                listSms.map((sms,index)=>{
+                                    return(
+                                        <tr key={sms.id}>
+                                            <td className='col-1'>{index+1}</td>
+                                            <td className='col-2'>{sms.date_send}</td>
+                                            <td className='col-3'>{sms.date_receive}</td>
+                                            <td className='col-4'>{sms.sender}</td>
+                                            <td className='col-5'>{sms.receiver}</td>
+                                            <td className='col-6' >
+                                                <div>{sms.content}</div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            }
+
                         </tbody>
                     </table>
                 </main>
