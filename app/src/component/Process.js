@@ -24,16 +24,17 @@ export class Process extends Component {
         else processData.push(currentProcess)
         return processData
     }
-    startProgress = async () => {
+    startProgress = () => {
         let idConfig = sessionStorage.getItem("idConfig")
-        if(idConfig != null){
+        if(idConfig != null && sessionStorage.getItem("status") != 1){
             sessionStorage.setItem("running",1)
             try {
                 idConfig = parseInt(idConfig, 10)
-                await axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
+                axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
                 .then(respone => {
-                    console.log(respone)
+                    console.log(respone.data)
                 })
+                this.componentDidMount()
             } 
             catch(error) {
                 console.log("Number exception")
@@ -43,12 +44,12 @@ export class Process extends Component {
             alert("Bạn chưa cấu hình cho tiến trình")
         }
     }
-    pauseOrContinueOrFinish = async (action) => {
+    pauseOrContinueOrFinish = (action) => {
         let running = sessionStorage.getItem("running")
+        console.log("running " + running)
         if(running==1){
             this.changeIconPauseContinue()
-            await axios.get('http://localhost:8081/api/action?action=' + action)
-            // http://localhost:8081/api/action?action
+            axios.get('http://localhost:8081/api/action?action=' + action)
                 .then(respone => {
                     console.log(respone)
                 })
@@ -62,11 +63,14 @@ export class Process extends Component {
         }))
     }
     componentDidMount = () => {
-        if(sessionStorage.getItem("running")===1){
+        console.log(sessionStorage.getItem("running"))
+        if(sessionStorage.getItem("running")==1){
+            console.log(1)
             var currentProcess
             this.state.intervalId = 
                 setInterval( () => {
-                    axios.get('http://localhost:8081/api/process_current')
+                    if(this.state.currentSim.index != this.state.currentSim.totalPhoneNumber && this.state.currentSim.status != "Thành công" || this.state.currentSim.status != "Thất bại") {
+                        axios.get('http://localhost:8081/api/process_current')
                         .then(respone => {
                             console.log(respone.data)
                             if (respone.data != null) currentProcess = respone.data
@@ -77,9 +81,16 @@ export class Process extends Component {
                                 processData : this.addProcess(prevState.processData, currentProcess)
                             }))
                             const process = this.state.processData
-                            sessionStorage("processData",process)
+                            sessionStorage.setItem("processData",process)
                         }
-                } ,5*1000)
+                    }
+                    else {
+                        alert("Tiến trình đã hoàn thành!!")
+                        this.componentWillUnmount()
+                        sessionStorage.setItem("running", 0)
+                        sessionStorage.setItem("status", 1)
+                    }
+                } ,3*1000)
         }
     }
     componentWillUnmount = () => {
@@ -134,8 +145,9 @@ export class Process extends Component {
                                         color: "#cc3f3f"
                                     }}
                                     onClick={() => {
+                                        this.pauseOrContinueOrFinish("finish");
                                         sessionStorage.setItem("running",0)
-                                        this.pauseOrContinueOrFinish("stop");
+                                        sessionStorage.setItem("status",0)
                                     }}
                                 />
                             </button>
