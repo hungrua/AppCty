@@ -16,7 +16,7 @@ export class Config extends Component {
     addConfigInfo= async (profilePath,idListSim,newProfilePath)=>{
         await axios.post("http://localhost:8081/api/config?profilePath="+profilePath+"&idListSim="+idListSim+"&newProfilePath="+newProfilePath)
             .then(response=>{
-                localStorage.setItem("idConfig", response.data)
+                sessionStorage.setItem("idConfig", response.data)
                 console.log(response.data)
                 alert("Lưu cấu hình thành công")
             })

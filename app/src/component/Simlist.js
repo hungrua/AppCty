@@ -132,11 +132,7 @@ export class Simlist extends Component {
             listPhoneNumber: this.updatedPhone,
             note: document.querySelector('textarea').value
         }
-        // await axios({
-        //     method:'PUT',
-        //     url: 'http://localhost:8081/api/listsim',
-        //     data: data
-        // })
+
         await axios.put("http://localhost:8081/api/listsim", data)
         .then((response)=>{
             console.log(response)
@@ -183,11 +179,6 @@ export class Simlist extends Component {
     }
     async componentDidMount() {
         await this.fetchData()
-    }
-    async componentDidUpdate(prevState){
-        if(this.state.listSim !== prevState.listSim){
-            await this.fetchData()
-        }
     }
     render() {
         const listSim = { ...this.state.listSim }

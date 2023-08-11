@@ -4,14 +4,15 @@ import './sass/process.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios'
-import { faMicrochip, faPowerOff, faCirclePause, faCircleMinus } from '@fortawesome/free-solid-svg-icons'
+import { faMicrochip, faPowerOff, faCirclePause, faCircleMinus,faCirclePlay } from '@fortawesome/free-solid-svg-icons'
 export class Process extends Component {
     constructor() {
         super()
         this.state = {
             currentSim: {},
             intervalId: null,
-            processData: []
+            processData: sessionStorage.getItem("processData")? sessionStorage.getItem("processData"):[],
+            currentIcon : faCirclePause
         }
         this.pauseContinueStatus = "continue"
     }
@@ -24,58 +25,62 @@ export class Process extends Component {
         return processData
     }
     startProgress = async () => {
-        let idConfig = localStorage.getItem("idConfig")
-        try {
-            idConfig = parseInt(idConfig, 10)
-            await axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
-            .then(respone => {
-                console.log(respone)
-            })
-        } 
-        catch(error) {
-            console.log("Number exception")
+        let idConfig = sessionStorage.getItem("idConfig")
+        if(idConfig != null){
+            sessionStorage.setItem("running",1)
+            try {
+                idConfig = parseInt(idConfig, 10)
+                await axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
+                .then(respone => {
+                    console.log(respone)
+                })
+            } 
+            catch(error) {
+                console.log("Number exception")
+            }
+        }
+        else{
+            alert("Bạn chưa cấu hình cho tiến trình")
         }
     }
     pauseOrContinueOrFinish = async (action) => {
-        // alert(action)
-        await axios.get('http://localhost:8081/api/action?action=' + action)
-        // http://localhost:8081/api/action?action
-            .then(respone => {
-                console.log(respone)
-            })
+        let running = sessionStorage.getItem("running")
+        if(running==1){
+            this.changeIconPauseContinue()
+            await axios.get('http://localhost:8081/api/action?action=' + action)
+            // http://localhost:8081/api/action?action
+                .then(respone => {
+                    console.log(respone)
+                })
+        }
+        else alert("Tiến trình chưa được bắt đầu")
+
     }
-    // fetchData = () => {
-    //     var currentProcess
-    //     setInterval( () => {
-    //         axios.get('http://localhost:8081/api/process_current')
-    //             .then(respone => {
-    //                 console.log(respone.data)
-    //                 if (respone.data != null) currentProcess = respone.data
-    //             })
-    //             if (currentProcess != null) {
-    //                 this.setState(prevState =>({
-    //                     currentSim: currentProcess,
-    //                     processData : this.addProcess(prevState.processData, currentProcess)
-    //                 }))
-    //             }
-    //     },5*1000)
-    // }
+    changeIconPauseContinue = () =>{
+        this.setState(prevState=>({
+            currentIcon: prevState.currentIcon=== faCirclePause? faCirclePlay:faCirclePause
+        }))
+    }
     componentDidMount = () => {
-        var currentProcess
-        this.state.intervalId = 
-            setInterval( () => {
-                axios.get('http://localhost:8081/api/process_current')
-                    .then(respone => {
-                        console.log(respone.data)
-                        if (respone.data != null) currentProcess = respone.data
-                    })
-                    if (currentProcess != null) {
-                        this.setState(prevState =>({
-                            currentSim: currentProcess,
-                            processData : this.addProcess(prevState.processData, currentProcess)
-                        }))
-                    }
-            } ,5*1000)
+        if(sessionStorage.getItem("running")===1){
+            var currentProcess
+            this.state.intervalId = 
+                setInterval( () => {
+                    axios.get('http://localhost:8081/api/process_current')
+                        .then(respone => {
+                            console.log(respone.data)
+                            if (respone.data != null) currentProcess = respone.data
+                        })
+                        if (currentProcess != null) {
+                            this.setState(prevState =>({
+                                currentSim: currentProcess,
+                                processData : this.addProcess(prevState.processData, currentProcess)
+                            }))
+                            const process = this.state.processData
+                            sessionStorage("processData",process)
+                        }
+                } ,5*1000)
+        }
     }
     componentWillUnmount = () => {
         clearInterval(this.state.intervalId)
@@ -84,6 +89,7 @@ export class Process extends Component {
     render() {
         const currentSim = { ...this.state.currentSim }
         const processData = this.state.processData
+        const currentIcon  = this.state.currentIcon
         // console.log(this.processData)
         return (
             <div className="process-container">
@@ -108,7 +114,7 @@ export class Process extends Component {
                         </div>
                         <div className="col-md-4 text-center btn-container">
                             <button className="btn-container-yellow">
-                                <FontAwesomeIcon icon={faCirclePause}
+                                <FontAwesomeIcon icon={currentIcon} id="pauseOrContinue"
                                     style={{
                                         fontSize: "2rem",
                                         color: "#d0dc45"
@@ -128,6 +134,7 @@ export class Process extends Component {
                                         color: "#cc3f3f"
                                     }}
                                     onClick={() => {
+                                        sessionStorage.setItem("running",0)
                                         this.pauseOrContinueOrFinish("stop");
                                     }}
                                 />
