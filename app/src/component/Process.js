@@ -4,51 +4,55 @@ import './sass/process.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import axios from 'axios'
-import { faMicrochip, faPowerOff, faCirclePause, faCircleMinus,faCirclePlay } from '@fortawesome/free-solid-svg-icons'
+import { faMicrochip, faPowerOff, faCirclePause, faCircleMinus, faCirclePlay } from '@fortawesome/free-solid-svg-icons'
 export class Process extends Component {
     constructor() {
         super()
+        // sessionStorage.setItem("processData", JSON.stringify([]))
         this.state = {
             currentSim: {},
             intervalId: null,
-            processData: sessionStorage.getItem("processData")? sessionStorage.getItem("processData"):[],
-            currentIcon : faCirclePause
+            processData: localStorage.getItem("processData") == null ? [] : JSON.parse(localStorage.getItem("processData")) ,
+            currentIcon: faCirclePause
         }
         this.pauseContinueStatus = "continue"
     }
-    addProcess = (processData, currentProcess)=>{
-        if(processData.find(process => process.current_phoneNumber === currentProcess.current_phoneNumber)){
+    addProcess = (processData, currentProcess) => {
+        if (processData.find(process => process.current_phoneNumber === currentProcess.current_phoneNumber)) {
             processData.pop()
             processData.push(currentProcess)
         }
         else processData.push(currentProcess)
         return processData
     }
-    startProgress = async () => {
+    startProgress = () => {
         let idConfig = sessionStorage.getItem("idConfig")
-        if(idConfig != null){
-            sessionStorage.setItem("running",1)
+        if (idConfig != null && sessionStorage.getItem("status") != 1) {
+            sessionStorage.setItem("running", 1)
             try {
                 idConfig = parseInt(idConfig, 10)
-                await axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
-                .then(respone => {
-                    console.log(respone)
-                })
-            } 
-            catch(error) {
+                localStorage.clear()
+                axios.get('http://localhost:8081/api/play?idConfig=' + idConfig)
+                    .then(respone => {
+                        console.log(respone.data)
+                    })
+                this.componentDidMount()
+            }
+            catch (error) {
                 console.log("Number exception")
             }
         }
-        else{
+        else {
             alert("Bạn chưa cấu hình cho tiến trình")
         }
     }
-    pauseOrContinueOrFinish = async (action) => {
+    pauseOrContinueOrFinish = (action) => {
         let running = sessionStorage.getItem("running")
-        if(running==1){
-            this.changeIconPauseContinue()
-            await axios.get('http://localhost:8081/api/action?action=' + action)
-            // http://localhost:8081/api/action?action
+        console.log("running " + running)
+        if (running == 1) {
+            if (action != "finish")
+                this.changeIconPauseContinue()
+            axios.get('http://localhost:8081/api/action?action=' + action)
                 .then(respone => {
                     console.log(respone)
                 })
@@ -56,30 +60,43 @@ export class Process extends Component {
         else alert("Tiến trình chưa được bắt đầu")
 
     }
-    changeIconPauseContinue = () =>{
-        this.setState(prevState=>({
-            currentIcon: prevState.currentIcon=== faCirclePause? faCirclePlay:faCirclePause
+    changeIconPauseContinue = () => {
+        this.setState(prevState => ({
+            currentIcon: prevState.currentIcon === faCirclePause ? faCirclePlay : faCirclePause
         }))
     }
     componentDidMount = () => {
-        if(sessionStorage.getItem("running")===1){
+        console.log(sessionStorage.getItem("running"))
+        if (sessionStorage.getItem("running") == 1) {
+            console.log(1)
             var currentProcess
-            this.state.intervalId = 
-                setInterval( () => {
+            this.state.intervalId =
+                setInterval(() => {
                     axios.get('http://localhost:8081/api/process_current')
-                        .then(respone => {
-                            console.log(respone.data)
-                            if (respone.data != null) currentProcess = respone.data
-                        })
-                        if (currentProcess != null) {
-                            this.setState(prevState =>({
-                                currentSim: currentProcess,
-                                processData : this.addProcess(prevState.processData, currentProcess)
+                    .then(respone => {
+                        return respone.data
+                    })
+                    .then(respone => {
+                        if (respone != null) {
+                            this.setState(prevState => ({
+                                currentSim: respone,
+                                processData: this.addProcess(prevState.processData, respone)
                             }))
-                            const process = this.state.processData
-                            sessionStorage("processData",process)
+                            // const process = 
+                            localStorage.setItem("processData", JSON.stringify(this.state.processData))
                         }
-                } ,5*1000)
+                        console.log("this.state.currentProcess.check " + respone.check)
+                        if (respone.check == true) {
+                            alert("Tiến trình đã hoàn thành!!")
+                            this.componentWillUnmount()
+                            sessionStorage.setItem("running", 0)
+                            sessionStorage.setItem("status", 1)
+                            localStorage.clear()
+                            sessionStorage.clear()
+                        }
+                    })
+
+                }, 3 * 1000)
         }
     }
     componentWillUnmount = () => {
@@ -89,7 +106,23 @@ export class Process extends Component {
     render() {
         const currentSim = { ...this.state.currentSim }
         const processData = this.state.processData
-        const currentIcon  = this.state.currentIcon
+        console.log(processData)
+        const currentIcon = this.state.currentIcon
+        const processRun = () => {
+            if (sessionStorage.getItem("running") == 1) {
+                processData.map((sim, index) => {
+                    return (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{sim.current_phoneNumber}</td>
+                            <td>{sim.status ? sim.status : "Đang gửi tin nhắn"}</td>
+                            <td>{sim.message}</td>
+                        </tr>
+
+                    )
+                })
+            }
+        }
         // console.log(this.processData)
         return (
             <div className="process-container">
@@ -134,8 +167,9 @@ export class Process extends Component {
                                         color: "#cc3f3f"
                                     }}
                                     onClick={() => {
-                                        sessionStorage.setItem("running",0)
-                                        this.pauseOrContinueOrFinish("stop");
+                                        this.pauseOrContinueOrFinish("finish");
+                                        sessionStorage.setItem("running", 0)
+                                        sessionStorage.setItem("status", 0)
                                     }}
                                 />
                             </button>
@@ -155,8 +189,8 @@ export class Process extends Component {
                                 aria-valuemax={100}
                             >
                             </div>
-                            <div className="progress-text" style={{ left: currentSim.process }}>
-                                <span>{currentSim.index}</span> / <span>{currentSim.totalPhoneNumber}</span>
+                            <div className="progress-text" style={{ left: "50%" }}>
+                                <span>{`${currentSim.index?currentSim.index + "/":"" } `}</span><span>{currentSim.totalPhoneNumber}</span>
                             </div>
                         </div>
                     </div>
@@ -176,7 +210,7 @@ export class Process extends Component {
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td>{sim.current_phoneNumber}</td>
-                                            <td>{sim.status?sim.status:"Đang gửi tin nhắn"}</td>
+                                            <td>{sim.status ? sim.status : "Đang gửi tin nhắn"}</td>
                                             <td>{sim.message}</td>
                                         </tr>
 
