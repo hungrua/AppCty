@@ -29,8 +29,8 @@ export class Simlist extends Component {
     // Hiện thị thông tin chi tiết 1 danh sách
     showAddWindow = async (id) => {
         document.querySelector('.sub-container').style.display = 'block';
-        let res = await axios.get("/phoneNumber/list?id=" + id);
-        // '/api/listsim?id=' + id
+        let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
+        // 'http://localhost:8081/api/listsim?id=' + id
         let data = res.data
         this.setState({
             variables: {
@@ -81,7 +81,7 @@ export class Simlist extends Component {
                 "ids": [id]
             }
         }
-        await axios.delete("/api/phoneNumber", config)
+        await axios.delete("http://localhost:8081/api/phoneNumber", config)
     }
     //Xóa 1 danh sach sim
     removeListSim = async (id) => {
@@ -96,7 +96,7 @@ export class Simlist extends Component {
             }
         }
         console.log(removeList)
-        await axios.delete("/api/listsim", config)
+        await axios.delete("http://localhost:8081/api/listsim", config)
     }
     // Thêm các số chỉnh sửa vào danh sách chỉnh sửa
     addToUpdatedPhoneList = (id, content) => {
@@ -114,7 +114,7 @@ export class Simlist extends Component {
         // console.log(this.updatedPhone)
     }
     addNewPhoneToList = (content) => {
-        if(content=="" || content.length<11){
+        if(content=="" || content.length != 9){
             alert("Yêu cầu nhập lại số điện thoại")
         }
         else{
@@ -132,28 +132,35 @@ export class Simlist extends Component {
             listPhoneNumber: this.updatedPhone,
             note: document.querySelector('textarea').value
         }
-        await axios({
-            method:'PUT',
-            url: '/simlist',
-            data: data
-        }).then((response)=>{
+        // await axios({
+        //     method:'PUT',
+        //     url: 'http://localhost:8081/api/listsim',
+        //     data: data
+        // })
+        await axios.put("http://localhost:8081/api/listsim", data)
+        .then((response)=>{
             console.log(response)
         })
         this.hideAddWindow()
         console.log(data)
     }
     //Thêm 1 danh sách sim 
-    addSimList = async (name,file)=>{
-        let formData = new FormData()
+    addSimList = (name,file)=>{
+        var formData = new FormData()
         formData.append('file',file)
         formData.append('name',name)
         const config ={
             headers: { 'content-type': 'multipart/form-data' }
         }
-        await axios.post('/api/file',formData,config)
-            .then(response => {
-                console.log(response)
-            })
+        axios.post('http://localhost:8081/api/file',formData,{
+            headers: { 'content-type': 'multipart/form-data' }
+        })
+        .then((response) => {
+            alert('File uploaded successfully.');
+        })
+        .catch((error) => {
+            alert('Error uploading file.');
+        });
     }
     // Hiển thị danh sách các danh sách sim
     removeMultiSimList = () => {
@@ -168,8 +175,8 @@ export class Simlist extends Component {
         this.removedListSim = []
     }
     fetchData = async()=>{
-        let res = await axios.get("/api/listsim")
-        // '/api/listsim'
+        let res = await axios.get("http://localhost:8081/api/listsim")
+        // 'http://localhost:8081/api/listsim'
         this.setState({
             listSim: res && res.data ? res.data : []
         })
@@ -262,7 +269,9 @@ export class Simlist extends Component {
                                             <td>{list.totalPhoneNumber}</td>
                                             <td>{list.note}</td>
                                             <td>
-                                                <button className="action-btn edit-btn" onClick={this.showAddWindow}>
+                                                <button className="action-btn edit-btn" onClick={()=>{
+                                                    this.showAddWindow(list.id)
+                                                }}>
                                                     <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
                                                 </button>
                                                 <button className="action-btn remove-btn"

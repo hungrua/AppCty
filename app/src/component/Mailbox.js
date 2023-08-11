@@ -9,8 +9,10 @@ export class Mailbox extends Component {
     constructor(){
         super();
         this.state ={
-            listMails: []
+            listMails: [],
+            intervalId: null
         }
+        // this.intervalId = null
     }
     // Effect for input
     changeToDateInput =(e)=>{
@@ -21,17 +23,22 @@ export class Mailbox extends Component {
     }
     // Find by condition
     findMailsByCondition = async (dateSend,dateReceive,receiver)=>{
-        console.log(dateSend,dateReceive,receiver)
-        await axios.get("/api/listSms?dateSend"+dateSend+"&dateReceive"+dateReceive+"&receiver"+receiver)
+        // console.log(dateSend,dateReceive,receiver)
+        // console.log("intervalId" + this.intervalId)
+        await axios.get("http://localhost:8081/api/listSms?dateSend="+dateSend+"&dateReceive="+dateReceive+"&receiver="+receiver)
             .then(response=>{
+                console.log("Response " + response.data)
                 this.setState({
                     listMails: response&&response.data ? response.data:[]
                 })
             })
     }
     // Get the mail
-    componentDidMount = async() =>{
-        setInterval(()=> this.findMailsByCondition("","",""),10*1000)
+    componentDidMount = () =>{
+        this.state.intervalId = setInterval(()=> this.findMailsByCondition("","",""),5*1000)
+    }
+    componentWillUnmount = () => {
+        clearInterval(this.state.intervalId)
     }
     render() {
         const listSms = [...this.state.listMails]

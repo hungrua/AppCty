@@ -14,14 +14,16 @@ export class Config extends Component {
         }
     }
     addConfigInfo= async (profilePath,idListSim,newProfilePath)=>{
-        await axios.post("/api/config?profilePath="+profilePath+"&idListSim="+idListSim+"&newProfilePath="+newProfilePath)
+        await axios.post("http://localhost:8081/api/config?profilePath="+profilePath+"&idListSim="+idListSim+"&newProfilePath="+newProfilePath)
             .then(response=>{
+                localStorage.setItem("idConfig", response.data)
+                console.log(response.data)
                 alert("Lưu cấu hình thành công")
             })
     }
     fillSimListSelection = async ()=>{
         var listSim;
-        await axios.get("/api/config")
+        await axios.get("http://localhost:8081/api/listsim")
             .then(response=>{
                 listSim = response.data && response ? response.data: []    
             })
@@ -29,17 +31,13 @@ export class Config extends Component {
     }
     fillProFileSelection = async ()=>{
         var listProFile;
-        await axios.get("/api/profiles")
+        await axios.get("http://localhost:8081/api/profiles")
             .then(response=>{
                 listProFile = response.data && response ? response.data: []    
             })
         this.setState({listProFile:listProFile})
     }
     componentDidMount = async () =>{
-        await this.fillProFileSelection()
-        await this.fillSimListSelection()
-    }
-    componentDidUpdate = async () =>{
         await this.fillProFileSelection()
         await this.fillSimListSelection()
     }
@@ -138,11 +136,14 @@ export class Config extends Component {
                                 let profilePath = document.getElementById("Profile-Path").value
                                 let idListSim = document.getElementById("select-sim").value
                                 let newProfilePath = document.getElementById("newProfile").value
-                                if(newProfilePath!=null ){
+                                if(newProfilePath!='' ){
+                                    console.log("newProfilePath " + newProfilePath)
                                     this.addConfigInfo(-1, "", newProfilePath)
                                 }
                                 else{
-                                    if(!profilePath || !idListSim){
+                                    console.log("profilePath" + profilePath)
+                                    console.log("idListSim" + idListSim)
+                                    if(profilePath != '' && idListSim != ''){
                                         this.addConfigInfo(profilePath,idListSim,"")
                                     }
                                     else alert("Vui lòng chọn đủ thông tin")

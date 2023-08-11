@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component, useState, useEffect } from 'react'
+// import React, { useState, useEffect } from 'react';
 import './sass/process.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,52 +9,82 @@ export class Process extends Component {
     constructor() {
         super()
         this.state = {
-            currentSim: {}
+            currentSim: {},
+            intervalId: null,
+            processData: []
         }
-        this.processData = []
         this.pauseContinueStatus = "continue"
     }
+    addProcess = (processData, currentProcess)=>{
+        if(processData.find(process => process.current_phoneNumber === currentProcess.current_phoneNumber)){
+            processData.pop()
+            processData.push(currentProcess)
+        }
+        else processData.push(currentProcess)
+        return processData
+    }
     startProgress = async () => {
-        await axios.get('/api/play')
+        let idConfig = localStorage.getItem("idConfig")
+        try {
+            idConfig = parseInt(idConfig, 10)
+            await axios.get('http://localhost:8081/api/play?idConfig='+idConfig)
             .then(respone => {
                 console.log(respone)
             })
+        } 
+        catch(error) {
+            console.log("Number exception")
+        }
     }
     pauseOrContinueOrFinish = async (action) => {
         // alert(action)
-        await axios.get('/api/?action=' + action)
+        await axios.get('http://localhost:8081/api/action?action=' + action)
+        // http://localhost:8081/api/action?action
             .then(respone => {
                 console.log(respone)
             })
     }
-    fetchData = async () => {
+    // fetchData = () => {
+    //     var currentProcess
+    //     setInterval( () => {
+    //         axios.get('http://localhost:8081/api/process_current')
+    //             .then(respone => {
+    //                 console.log(respone.data)
+    //                 if (respone.data != null) currentProcess = respone.data
+    //             })
+    //             if (currentProcess != null) {
+    //                 this.setState(prevState =>({
+    //                     currentSim: currentProcess,
+    //                     processData : this.addProcess(prevState.processData, currentProcess)
+    //                 }))
+    //             }
+    //     },5*1000)
+    // }
+    componentDidMount = () => {
         var currentProcess
-        setInterval(async () => {
-            await axios.get('/api/process_current')
-                .then(respone => {
-                    if (respone.data != 'null') currentProcess = respone.data
-                })
-            if (currentProcess != null) {
-                this.setState(({
-                    currentSim: currentProcess
-                }))
-                if(this.processData.find(process => process.current_phoneNumber === currentProcess.current_phoneNumber)){
-                    this.processData.pop()
-                    this.processData.push(currentProcess)
-                }
-            }
+        this.state.intervalId = 
+            setInterval( () => {
+                axios.get('http://localhost:8081/api/process_current')
+                    .then(respone => {
+                        console.log(respone.data)
+                        if (respone.data != null) currentProcess = respone.data
+                    })
+                    if (currentProcess != null) {
+                        this.setState(prevState =>({
+                            currentSim: currentProcess,
+                            processData : this.addProcess(prevState.processData, currentProcess)
+                        }))
+                    }
+            } ,5*1000)
+    }
+    componentWillUnmount = () => {
+        clearInterval(this.state.intervalId)
+    }
 
-        },10*1000)
-    }
-    componentDidMount = async () => {
-        await this.fetchData()
-    }
-    componentDidUpdate = async () => {
-        await this.fetchData()
-    }
     render() {
         const currentSim = { ...this.state.currentSim }
-        console.log(this.processData)
+        const processData = this.state.processData
+        // console.log(this.processData)
         return (
             <div className="process-container">
                 <div className="header">
@@ -133,7 +164,7 @@ export class Process extends Component {
                         </thead>
                         <tbody className="text-center" >
                             {
-                                this.processData.map((sim, index) => {
+                                processData.map((sim, index) => {
                                     return (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
