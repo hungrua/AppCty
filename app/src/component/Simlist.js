@@ -22,28 +22,32 @@ export class Simlist extends Component {
                 },
             },
             listSim: [],
-            addedPhoneNumber: ""
         }
         this.updatedPhone = []
         this.removedListSim = []
     }
     // Hiện thị thông tin chi tiết 1 danh sách
     showAddWindow = async (id) => {
-        document.querySelector('.sub-container').style.display = 'block';
-        let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
-        // 'http://localhost:8081/api/listsim?id=' + id
-        let data = res.data
-        this.setState({
-            variables: {
-                openWindowObject: {
-                    id: data.id,
-                    name: data.name,
-                    listPhoneNumber: data.listPhoneNumber,
-                    note: data.note,
-                    updatedPhoneNumberList: [],
-                },
-            }
-        })
+        if (sessionStorage.getItem("running") == 1) {
+            alert("Tiến trình đang chạy không được phép sửa")
+        }
+        else {
+            document.querySelector('.sub-container').style.display = 'block';
+            let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
+            // 'http://localhost:8081/api/listsim?id=' + id
+            let data = res.data
+            this.setState({
+                variables: {
+                    openWindowObject: {
+                        id: data.id,
+                        name: data.name,
+                        listPhoneNumber: data.listPhoneNumber,
+                        note: data.note,
+                        updatedPhoneNumberList: [],
+                    },
+                }
+            })
+        }
     }
     // Đóng cửa sổ thông tin chi tiết 1 danh sách
     hideAddWindow = () => {
@@ -86,18 +90,24 @@ export class Simlist extends Component {
     }
     //Xóa 1 danh sach sim
     removeListSim = async (id) => {
-        let removeList = []
-        if (typeof id === "string") {
-            removeList.push(id)
+        if (sessionStorage.getItem("running") == 1) {
+            alert("Tiến trình đang chạy không được phép xóa")
         }
-        else removeList = [...id]
-        let config = {
-            headers: {
-                "ids": removeList
+        else {
+            let removeList = []
+            if (typeof id === "string") {
+                removeList.push(id)
             }
+            else removeList = [...id]
+            let config = {
+                headers: {
+                    "ids": removeList
+                }
+            }
+            console.log(removeList)
+            await axios.delete("http://localhost:8081/api/listsim", config)
+            this.componentDidMount()
         }
-        console.log(removeList)
-        await axios.delete("http://localhost:8081/api/listsim", config)
     }
     // Thêm các số chỉnh sửa vào danh sách chỉnh sửa
     addToUpdatedPhoneList = (id, content) => {
@@ -123,9 +133,14 @@ export class Simlist extends Component {
                 id: null,
                 phoneNumber: content
             })
-            this.setState({
+            console.log(content)
+            this.setState(prevState => ({
+                variables: prevState.variables,
+                listSim: prevState.listSim,
                 addedPhoneNumber: content
-            })
+            }))
+            console.log(this.state.addedPhoneNumber)
+
         }
     }
     // Chỉnh sửa chi tiết 1 danh sách sim
@@ -142,6 +157,7 @@ export class Simlist extends Component {
                 console.log(response)
             })
         this.hideAddWindow()
+        this.componentDidMount()
         console.log(data)
     }
     //Thêm 1 danh sách sim 
@@ -153,27 +169,34 @@ export class Simlist extends Component {
             headers: { 'content-type': 'multipart/form-data' }
         }
         console.log(formData.get('file'))
-        axios.post('http://localhost:8081/api/file',formData,{
+        axios.post('http://localhost:8081/api/file', formData, {
             headers: { 'content-type': 'multipart/form-data' }
         })
-        .then((response) => {
-            alert('File uploaded successfully.');
-        })
-        .catch((error) => {
-            alert('Error uploading file.');
-        });
+            .then((response) => {
+                alert('File uploaded successfully.');
+                this.componentDidMount()
+            })
+            .catch((error) => {
+                alert('Error uploading file.');
+            });
     }
     // Hiển thị danh sách các danh sách sim
     removeMultiSimList = () => {
-        let lists = document.querySelectorAll("input[type='checkbox']");
-        lists.forEach(list => {
-            if (list.checked === true) {
-                this.removedListSim.push(list.getAttribute("list_id"))
-            }
-        })
-        this.removeListSim(this.removedListSim)
-        // console.log(this.removedListSim)
-        this.removedListSim = []
+        if(sessionStorage.getItem("running") == 1) {
+            alert("Tiến trình đang chạy không được phép xóa")
+        }
+        else {
+            let lists = document.querySelectorAll("input[type='checkbox']");
+            lists.forEach(list => {
+                if (list.checked === true) {
+                    this.removedListSim.push(list.getAttribute("list_id"))
+                }
+            })
+            this.removeListSim(this.removedListSim)
+            // console.log(this.removedListSim)
+            this.removedListSim = []
+
+        }
     }
     fetchData = async () => {
         let res = await axios.get("http://localhost:8081/api/listsim")
@@ -182,8 +205,8 @@ export class Simlist extends Component {
             listSim: res && res.data ? res.data : []
         })
     }
-    async componentDidMount() {
-        // await this.fetchData()
+    componentDidMount() {
+        this.fetchData()
     }
     render() {
         const listSim = { ...this.state.listSim }
@@ -194,7 +217,7 @@ export class Simlist extends Component {
                 <tr>
                     <td></td>
                     <td>
-                        <input type="tel" name="" id="" defaultValue={addedPhoneNumber}/>
+                        <input type="tel" name="" id="" defaultValue={addedPhoneNumber} />
                     </td>
                     <td>
                         <button className="action-btn remove-btn"
@@ -309,7 +332,7 @@ export class Simlist extends Component {
                     <div className='mullti_delete d-flex justify-content-end'
                         onClick={this.removeMultiSimList}
                     >
-                        <button className='btn btn-outline-danger'>Xóa</button>
+                        <button className='btn btn-outline-danger' id="remove-many">Xóa</button>
                     </div>
                 </main>
                 <div className="sub-container" style={{ display: "none" }}>
@@ -348,7 +371,6 @@ export class Simlist extends Component {
                                 <button
                                     onClick={() => {
                                         this.addNewPhoneToList(document.querySelector("input[name='listNumber']").value)
-                                        document.querySelector("input[name='listNumber']").value = ""
                                     }}
                                 >
                                     <FontAwesomeIcon icon={faPlus} style={{ color: "#ffffff" }} /> Thêm

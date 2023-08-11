@@ -40,6 +40,14 @@ export class Config extends Component {
     componentDidMount = async () =>{
         await this.fillProFileSelection()
         await this.fillSimListSelection()
+        if(sessionStorage.getItem("running")==1){
+            document.getElementById("Profile-Path").setAttribute("disabled", "true");
+            document.getElementById("select-sim").setAttribute("disabled", "true");
+        }
+        else {
+            document.getElementById("Profile-Path").removeAttribute("disabled")
+            document.getElementById("select-sim").removeAttribute("disabled")
+        }
     }
     
     render() {
@@ -130,9 +138,10 @@ export class Config extends Component {
                             </select>
                         </div>
                         <div className="btn-container">
-                            <button type="submit" className="button-submit br"
+                            <button type="submit" className="button-submit br" id="save-config"
                             onClick={(e)=>{
                                 e.preventDefault();
+                                localStorage.clear()
                                 let profilePath = document.getElementById("Profile-Path").value
                                 let idListSim = document.getElementById("select-sim").value
                                 let newProfilePath = document.getElementById("newProfile").value
