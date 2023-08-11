@@ -21,7 +21,8 @@ export class Simlist extends Component {
                     updatedPhoneNumberList: [],
                 },
             },
-            listSim: []
+            listSim: [],
+            addedPhoneNumber: ""
         }
         this.updatedPhone = []
         this.removedListSim = []
@@ -75,7 +76,7 @@ export class Simlist extends Component {
         }))
     }
     // Xóa 1 số số điện thoại nào đó trong danh sách sim
-    removePhoneNumberOnListSim = async(id) => {
+    removePhoneNumberOnListSim = async (id) => {
         let config = {
             headers: {
                 "ids": [id]
@@ -85,8 +86,8 @@ export class Simlist extends Component {
     }
     //Xóa 1 danh sach sim
     removeListSim = async (id) => {
-        let removeList=[]
-        if(typeof id === "string" ){
+        let removeList = []
+        if (typeof id === "string") {
             removeList.push(id)
         }
         else removeList = [...id]
@@ -114,13 +115,16 @@ export class Simlist extends Component {
         // console.log(this.updatedPhone)
     }
     addNewPhoneToList = (content) => {
-        if(content=="" || content.length != 9){
+        if (content == "" || content.length != 9) {
             alert("Yêu cầu nhập lại số điện thoại")
         }
-        else{
+        else {
             this.updatedPhone.push({
                 id: null,
                 phoneNumber: content
+            })
+            this.setState({
+                addedPhoneNumber: content
             })
         }
     }
@@ -134,20 +138,21 @@ export class Simlist extends Component {
         }
 
         await axios.put("http://localhost:8081/api/listsim", data)
-        .then((response)=>{
-            console.log(response)
-        })
+            .then((response) => {
+                console.log(response)
+            })
         this.hideAddWindow()
         console.log(data)
     }
     //Thêm 1 danh sách sim 
-    addSimList = (name,file)=>{
+    addSimList = (name, file) => {
         var formData = new FormData()
-        formData.append('file',file)
-        formData.append('name',name)
-        const config ={
+        formData.append('file', file)
+        formData.append('name', name)
+        const config = {
             headers: { 'content-type': 'multipart/form-data' }
         }
+        console.log(formData.get('file'))
         axios.post('http://localhost:8081/api/file',formData,{
             headers: { 'content-type': 'multipart/form-data' }
         })
@@ -160,9 +165,9 @@ export class Simlist extends Component {
     }
     // Hiển thị danh sách các danh sách sim
     removeMultiSimList = () => {
-        let lists  = document.querySelectorAll("input[type='checkbox']");
+        let lists = document.querySelectorAll("input[type='checkbox']");
         lists.forEach(list => {
-            if(list.checked === true) {
+            if (list.checked === true) {
                 this.removedListSim.push(list.getAttribute("list_id"))
             }
         })
@@ -170,7 +175,7 @@ export class Simlist extends Component {
         // console.log(this.removedListSim)
         this.removedListSim = []
     }
-    fetchData = async()=>{
+    fetchData = async () => {
         let res = await axios.get("http://localhost:8081/api/listsim")
         // 'http://localhost:8081/api/listsim'
         this.setState({
@@ -178,11 +183,31 @@ export class Simlist extends Component {
         })
     }
     async componentDidMount() {
-        await this.fetchData()
+        // await this.fetchData()
     }
     render() {
         const listSim = { ...this.state.listSim }
         const listSimCunrrentOpen = { ...this.state.variables.openWindowObject }
+        const addedPhoneNumber = this.state.addedPhoneNumber
+        const addPhone = (phone) => {
+            if (phone != "") return (
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="tel" name="" id="" defaultValue={addedPhoneNumber}/>
+                    </td>
+                    <td>
+                        <button className="action-btn remove-btn"
+                            onClick={() => {
+                                alert("Lưu danh sách trước khi thực hiện thao tác")
+                            }}
+                        >
+                        </button>
+                    </td>
+                </tr>
+
+            )
+        }
         return (
             <div className="simlist-container">
                 <div className="header">
@@ -195,7 +220,6 @@ export class Simlist extends Component {
                     <div className="searcher d-flex">
                         <form
                             action=""
-                            method="post"
                             className="d-flex justify-content-between"
                         >
                             <div className="searcher-inputTel d-flex align-items-center">
@@ -221,11 +245,11 @@ export class Simlist extends Component {
                                 <input id="file-upload" type="file" />
                             </div>
                             <button
-                                onClick={(e)=>{
+                                onClick={(e) => {
                                     let name = document.querySelector("#newListName").value
-                                    let file = document.querySelector("#file-upload").value
+                                    let file = document.querySelector("#file-upload").files[0]
                                     e.preventDefault();
-                                    this.addSimList(name,file)
+                                    this.addSimList(name, file)
                                 }}
                             >Thêm mới</button>
                         </form>
@@ -252,7 +276,7 @@ export class Simlist extends Component {
                                     return (
                                         <tr key={index}>
                                             <td>
-                                                <input type="checkbox" name="" list_id = {list.id}
+                                                <input type="checkbox" name="" list_id={list.id}
                                                 />
                                             </td>
                                             <td>{index + 1}</td>
@@ -260,16 +284,16 @@ export class Simlist extends Component {
                                             <td>{list.totalPhoneNumber}</td>
                                             <td>{list.note}</td>
                                             <td>
-                                                <button className="action-btn edit-btn" onClick={()=>{
+                                                <button className="action-btn edit-btn" onClick={() => {
                                                     this.showAddWindow(list.id)
                                                 }}>
                                                     <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#24c79f" }} />
                                                 </button>
                                                 <button className="action-btn remove-btn"
-                                                onClick={(e)=>{
-                                                    const checkbox = e.currentTarget.closest("tr").querySelector("input[type='checkbox']");
-                                                    this.removeListSim(checkbox.getAttribute("list_id"))
-                                                }}
+                                                    onClick={(e) => {
+                                                        const checkbox = e.currentTarget.closest("tr").querySelector("input[type='checkbox']");
+                                                        this.removeListSim(checkbox.getAttribute("list_id"))
+                                                    }}
                                                 >
                                                     <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
                                                 </button>
@@ -279,9 +303,10 @@ export class Simlist extends Component {
                                 })
 
                             }
+                            {addPhone}
                         </tbody>
                     </table>
-                    <div className='mullti_delete d-flex justify-content-end' 
+                    <div className='mullti_delete d-flex justify-content-end'
                         onClick={this.removeMultiSimList}
                     >
                         <button className='btn btn-outline-danger'>Xóa</button>
@@ -323,6 +348,7 @@ export class Simlist extends Component {
                                 <button
                                     onClick={() => {
                                         this.addNewPhoneToList(document.querySelector("input[name='listNumber']").value)
+                                        document.querySelector("input[name='listNumber']").value = ""
                                     }}
                                 >
                                     <FontAwesomeIcon icon={faPlus} style={{ color: "#ffffff" }} /> Thêm
@@ -349,13 +375,13 @@ export class Simlist extends Component {
                                                                 onBlur={(e) => {
                                                                     this.addToUpdatedPhoneList(phone.id, e.target.value)
                                                                 }}
-                                                                />
+                                                            />
                                                         </td>
                                                         <td>
                                                             <button className="action-btn remove-btn"
-                                                            onClick={()=>{
-                                                                this.removePhoneNumberOnAList(phone.id)
-                                                            }}
+                                                                onClick={() => {
+                                                                    this.removePhoneNumberOnAList(phone.id)
+                                                                }}
                                                             >
                                                                 <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
                                                             </button>
