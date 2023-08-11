@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import './sass/simlist.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import Subcontainer from './Subcontainer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
     faList, faSimCard, faPlus,
@@ -10,176 +11,84 @@ import axios from 'axios'
 export class Simlist extends Component {
     constructor() {
         super();
+
         this.state = {
-            variables: {
-                checkbox: true,
-                openWindowObject: {
-                    id: '',
-                    name: '',
-                    listPhoneNumber: [],
-                    note: '',
-                    updatedPhoneNumberList: [],
-                },
-            },
+            checkbox : true,
             listSim: [],
+            id,
+            displayWindow: false
         }
-        this.updatedPhone = []
         this.removedListSim = []
     }
+    hideSubcontainer = () => {
+        this.setState({ displayWindow: false });
+    }
     // Hiện thị thông tin chi tiết 1 danh sách
-    showAddWindow = async (id) => {
+    showAddWindow =  (id) => {
         if (sessionStorage.getItem("running") == 1) {
             alert("Tiến trình đang chạy không được phép sửa")
         }
-        else {
-            document.querySelector('.sub-container').style.display = 'block';
-            let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
-            // 'http://localhost:8081/api/listsim?id=' + id
-            let data = res.data
+        else{
             this.setState({
-                variables: {
-                    openWindowObject: {
-                        id: data.id,
-                        name: data.name,
-                        listPhoneNumber: data.listPhoneNumber,
-                        note: data.note,
-                        updatedPhoneNumberList: [],
-                    },
-                }
-            })
-        }
-    }
-    // Đóng cửa sổ thông tin chi tiết 1 danh sách
-    hideAddWindow = () => {
-        this.setState(prevState => ({
-            variables: {
-                checkbox: true,
-                openWindowObject: {
-                    id: '',
-                    name: '',
-                    listPhoneNumber: [],
-                    note: '',
-                    updatedPhoneNumberList: [],
-                }
-            },
-            listSim: prevState.listSim
-        }))
-        this.updatedPhone = []
-        document.querySelector('.sub-container').style.display = 'none';
+                id:id,
+                displayWindow : true,}
+            )
+        } 
     }
     //Tích chọn toàn bộ danh sách
     tickAllCheckbox = () => {
         const tmp = { ...this.state }
         document.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
-            checkbox.checked = tmp.variables.checkbox;
+            checkbox.checked = tmp.checkbox;
         })
         this.setState(prevState => ({
             variables: {
-                checkbox: prevState.variables.checkbox === true ? false : true
+                checkbox: prevState.checkbox === true ? false : true
             }
         }))
     }
-    // Xóa 1 số số điện thoại nào đó trong danh sách sim
-    removePhoneNumberOnListSim = async (id) => {
-        let config = {
-            headers: {
-                "ids": [id]
-            }
-        }
-        await axios.delete("http://localhost:8081/api/phoneNumber", config)
-    }
     //Xóa 1 danh sach sim
-    removeListSim = async (id) => {
-        if (sessionStorage.getItem("running") == 1) {
-            alert("Tiến trình đang chạy không được phép xóa")
-        }
-        else {
-            let removeList = []
-            if (typeof id === "string") {
-                removeList.push(id)
-            }
-            else removeList = [...id]
-            let config = {
-                headers: {
-                    "ids": removeList
-                }
-            }
-            console.log(removeList)
-            await axios.delete("http://localhost:8081/api/listsim", config)
-            this.componentDidMount()
-        }
-    }
-    // Thêm các số chỉnh sửa vào danh sách chỉnh sửa
-    addToUpdatedPhoneList = (id, content) => {
-        var tmp = this.updatedPhone.findIndex(phone => phone.id === id)
-        let updatedPhone = {
-            id: id,
-            phoneNumber: content
-        }
-        if (tmp != -1) {
-            this.updatedPhone.splice(tmp, 1, updatedPhone)
-        }
-        else {
-            this.updatedPhone.push(updatedPhone)
-        }
-        // console.log(this.updatedPhone)
-    }
-    addNewPhoneToList = (content) => {
-        if (content == "" || content.length != 9) {
-            alert("Yêu cầu nhập lại số điện thoại")
-        }
-        else {
-            this.updatedPhone.push({
-                id: null,
-                phoneNumber: content
-            })
-            console.log(content)
-            this.setState(prevState => ({
-                variables: prevState.variables,
-                listSim: prevState.listSim,
-                addedPhoneNumber: content
-            }))
-            console.log(this.state.addedPhoneNumber)
+    // removeListSim = async (id) => {
+    //     if (sessionStorage.getItem("running") == 1) {
+    //         alert("Tiến trình đang chạy không được phép xóa")
+    //     }
+    //     else {
+    //         let removeList = []
+    //         if (typeof id === "string") {
+    //             removeList.push(id)
+    //         }
+    //         else removeList = [...id]
+    //         let config = {
+    //             headers: {
+    //                 "ids": removeList
+    //             }
+    //         }
+    //         console.log(removeList)
+    //         await axios.delete("http://localhost:8081/api/listsim", config)
+    //         this.componentDidMount()
+    //     }
+    // }
 
-        }
-    }
-    // Chỉnh sửa chi tiết 1 danh sách sim
-    updateSimList = async () => {
-        const data = {
-            id: document.querySelector("input[name='id']").defaultValue,
-            name: document.querySelector("input[name='listName']").value,
-            listPhoneNumber: this.updatedPhone,
-            note: document.querySelector('textarea').value
-        }
-
-        await axios.put("http://localhost:8081/api/listsim", data)
-            .then((response) => {
-                console.log(response)
-            })
-        this.hideAddWindow()
-        this.componentDidMount()
-        console.log(data)
-    }
     //Thêm 1 danh sách sim 
-    addSimList = (name, file) => {
-        var formData = new FormData()
-        formData.append('file', file)
-        formData.append('name', name)
-        const config = {
-            headers: { 'content-type': 'multipart/form-data' }
-        }
-        console.log(formData.get('file'))
-        axios.post('http://localhost:8081/api/file', formData, {
-            headers: { 'content-type': 'multipart/form-data' }
-        })
-            .then((response) => {
-                alert('File uploaded successfully.');
-                this.componentDidMount()
-            })
-            .catch((error) => {
-                alert('Error uploading file.');
-            });
-    }
+    // addSimList = (name, file) => {
+    //     var formData = new FormData()
+    //     formData.append('file', file)
+    //     formData.append('name', name)
+    //     const config = {
+    //         headers: { 'content-type': 'multipart/form-data' }
+    //     }
+    //     console.log(formData.get('file'))
+    //     axios.post('http://localhost:8081/api/file', formData, {
+    //         headers: { 'content-type': 'multipart/form-data' }
+    //     })
+    //         .then((response) => {
+    //             alert('File uploaded successfully.');
+    //             this.componentDidMount()
+    //         })
+    //         .catch((error) => {
+    //             alert('Error uploading file.');
+    //         });
+    // }
     // Hiển thị danh sách các danh sách sim
     removeMultiSimList = () => {
         if(sessionStorage.getItem("running") == 1) {
@@ -199,7 +108,7 @@ export class Simlist extends Component {
         }
     }
     fetchData = async () => {
-        let res = await axios.get("http://localhost:8081/api/listsim")
+        let res = await axios.get("http://localhost:3000/listSim")
         // 'http://localhost:8081/api/listsim'
         this.setState({
             listSim: res && res.data ? res.data : []
@@ -210,27 +119,9 @@ export class Simlist extends Component {
     }
     render() {
         const listSim = { ...this.state.listSim }
-        const listSimCunrrentOpen = { ...this.state.variables.openWindowObject }
-        const addedPhoneNumber = this.state.addedPhoneNumber
-        const addPhone = (phone) => {
-            if (phone != "") return (
-                <tr>
-                    <td></td>
-                    <td>
-                        <input type="tel" name="" id="" defaultValue={addedPhoneNumber} />
-                    </td>
-                    <td>
-                        <button className="action-btn remove-btn"
-                            onClick={() => {
-                                alert("Lưu danh sách trước khi thực hiện thao tác")
-                            }}
-                        >
-                        </button>
-                    </td>
-                </tr>
-
-            )
-        }
+        const display  = this.state.displayWindow
+        const id = this.state.id
+        console.log(display)
         return (
             <div className="simlist-container">
                 <div className="header">
@@ -326,7 +217,6 @@ export class Simlist extends Component {
                                 })
 
                             }
-                            {addPhone}
                         </tbody>
                     </table>
                     <div className='mullti_delete d-flex justify-content-end'
@@ -335,7 +225,8 @@ export class Simlist extends Component {
                         <button className='btn btn-outline-danger' id="remove-many">Xóa</button>
                     </div>
                 </main>
-                <div className="sub-container" style={{ display: "none" }}>
+                {   display&&<Subcontainer hideSubcontainer={this.hideSubcontainer} id={id} />}
+                {/* <div className="sub-container" style={{ display: "none" }}>
                     <div className="editCard">
                         <div className="editCard-delete">
                             <button onClick={this.hideAddWindow}>
@@ -435,7 +326,7 @@ export class Simlist extends Component {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         )
     }
