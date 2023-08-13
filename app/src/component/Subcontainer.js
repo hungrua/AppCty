@@ -7,6 +7,7 @@ import {
     faMobileScreenButton, faFileExcel, faPenToSquare, faTrashCan, faCircleXmark, faNoteSticky, faFloppyDisk
 } from '@fortawesome/free-solid-svg-icons'
 import axios from 'axios'
+import ListPhoneNumber from './ListPhoneNumber'
 export class Subcontainer extends Component {
     constructor(props) {
         super(props)
@@ -16,68 +17,52 @@ export class Subcontainer extends Component {
                 name: '',
                 listPhoneNumber: [],
                 note: ''
+            },
+            form: {
+                listName: "",
+                note: ""
             }
         }
     }
-    hideAddWindow =()=>{
+    hideAddWindow = () => {
         this.props.hideSubcontainer();
     }
-    removePhoneNumberOnAList = (id) => {
-        let config = {
-            headers: {
-                "ids": [id]
+    handleInput = (e) => {
+        const data = { ...this.state.form }
+        data[e.target.name] = e.target.value;
+    
+        this.setState({
+            form: {
+                ...this.state.form,
+                listName: data.listName,
+                note: data.note,
             }
-        }
-        axios.delete("http://localhost:8081/api/phoneNumber", config)
-        this.componentDidMount()
+        });
     }
-    updatePhoneNumber =  (idPhone, content) => {
-        const { id } = this.props.id;
-        let data = {
+    updateSimList = async (e) => {
+        e.preventDefault();
+        const id  = this.props.id
+        const name = this.state.form.listName
+        const note = this.state.form.note
+
+        console.log(name,note)
+        let data ={
             id: id,
-            listPhoneNumber: {
-                id: idPhone,
-                phoneNumber: content
-            }
-        }
-        const respone = axios.put("http://localhost:8081/api/listsim", data)
-        this.componentDidMount()
-    }
-    addNewPhoneToList = (content) => {
-        if (content == "" || content.length != 9) {
-            alert("Yêu cầu nhập lại số điện thoại")
-        }
-        else {
-            const { id } = this.props.id;
-            let data = {
-                id: id,
-                listPhoneNumber: {
-                    id: null,
-                    phoneNumber: content
-                }
-            }
-            axios.put("http://localhost:8081/api/listsim", data)
-            this.componentDidMount()
-        }
-    }
-    updateSimList = () => {
-        const data = {
-            id: document.querySelector("input[name='id']").value,
-            name: document.querySelector("input[name='listName']").value,
-            note: document.querySelector('textarea').value
+            name : name,
+            note : note
         }
 
-        axios.put("http://localhost:8081/api/listsim", data)
+        await axios.put("http://localhost:8081/api/listsim", data)
             .then((response) => {
                 console.log(response)
+                this.hideAddWindow()
+                alert("Cập nhật danh sách sim thành công!")
             })
-        this.hideAddWindow()
     }
     componentDidMount = async () => {
-        const { id } = this.props.id;
+        const  id  = this.props.id;
         document.querySelector('.sub-container').style.display = 'block';
         let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
-        // http://localhost:8081/api/phoneNumber/list?id=" + id
         let data = res.data
         this.setState({
             openWindowObject: {
@@ -85,18 +70,25 @@ export class Subcontainer extends Component {
                 name: data.name,
                 listPhoneNumber: data.listPhoneNumber,
                 note: data.note
+            },
+            form:{
+                inputName : data.name,
+                note : data.note
             }
         })
+
     }
     render() {
         const listSimCunrrentOpen = this.state.openWindowObject
+        // const inputValue = this.state.form.listNumber
+        const id = this.props.id
         return (
             <div>
-                <div className="sub-container" style={{display:'none'}}>
+                <div className="sub-container" style={{ display: 'none' }}>
                     <div className="editCard">
                         <div className="editCard-delete">
                             <button
-                            onClick={this.hideAddWindow}
+                                onClick={this.hideAddWindow}
                             >
                                 <FontAwesomeIcon icon={faCircleXmark} style={{ color: "#cc3f3f" }} />
                             </button>
@@ -115,6 +107,7 @@ export class Subcontainer extends Component {
                                 name="listName"
                                 defaultValue={listSimCunrrentOpen.name}
                                 placeholder="Điền tên danh sách...."
+                                onChange={this.handleInput}
                             />
                         </div>
                         <div className="editCard-list">
@@ -122,60 +115,7 @@ export class Subcontainer extends Component {
                                 <FontAwesomeIcon icon={faSimCard} style={{ color: "#ffffff" }} />{" "}
                                 Danh sách sim
                             </label>
-                            <div className="editCard-list-searchOrAdd">
-                                <input
-                                    type="text"
-                                    name="listNumber"
-                                    defaultValue=""
-                                    placeholder="Thêm mới sim tại đây...."
-                                />
-                                <button
-                                    onClick={() => {
-                                        this.addNewPhoneToList(document.querySelector("input[name='listNumber']").value)
-                                    }}
-                                >
-                                    <FontAwesomeIcon icon={faPlus} style={{ color: "#ffffff" }} /> Thêm
-                                </button>
-                            </div>
-                            <div className="editCard-list-table">
-                                <table className="table text-center">
-                                    <thead>
-                                        <tr>
-                                            <th className="col-2">STT</th>
-                                            <th className="col-7">Sim</th>
-                                            <th className="col-3">Tác vụ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            listSimCunrrentOpen.listPhoneNumber.map((phone, index) => {
-                                                var sdt = phone.phoneNumber
-                                                return (
-                                                    <tr key={index}>
-                                                        <td>{index + 1}</td>
-                                                        <td>
-                                                            <input type="tel" name="" id="" defaultValue={sdt}
-                                                                onBlur={(e) => {
-                                                                    this.updatePhoneNumber(phone.id, e.target.value)
-                                                                }}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <button className="action-btn remove-btn"
-                                                                onClick={() => {
-                                                                    this.removePhoneNumberOnAList(phone.id)
-                                                                }}
-                                                            >
-                                                                <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
+                            <ListPhoneNumber id={id} />
                         </div>
                         <div className="editCard-note">
                             <label htmlFor="note">
@@ -189,6 +129,7 @@ export class Subcontainer extends Component {
                             <br />
                             <textarea name="note" id="note" rows={10}
                                 defaultValue={listSimCunrrentOpen.note}
+                                onChange={this.handleInput}
                             />
                         </div>
                         <div className="editCard-save">

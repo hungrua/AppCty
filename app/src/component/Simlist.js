@@ -11,17 +11,17 @@ import axios from 'axios'
 export class Simlist extends Component {
     constructor() {
         super();
-
         this.state = {
             checkbox : true,
             listSim: [],
-            id,
+            id : null,
             displayWindow: false
         }
         this.removedListSim = []
     }
     hideSubcontainer = () => {
         this.setState({ displayWindow: false });
+        this.fetchData()
     }
     // Hiện thị thông tin chi tiết 1 danh sách
     showAddWindow =  (id) => {
@@ -47,48 +47,49 @@ export class Simlist extends Component {
             }
         }))
     }
-    //Xóa 1 danh sach sim
-    // removeListSim = async (id) => {
-    //     if (sessionStorage.getItem("running") == 1) {
-    //         alert("Tiến trình đang chạy không được phép xóa")
-    //     }
-    //     else {
-    //         let removeList = []
-    //         if (typeof id === "string") {
-    //             removeList.push(id)
-    //         }
-    //         else removeList = [...id]
-    //         let config = {
-    //             headers: {
-    //                 "ids": removeList
-    //             }
-    //         }
-    //         console.log(removeList)
-    //         await axios.delete("http://localhost:8081/api/listsim", config)
-    //         this.componentDidMount()
-    //     }
-    // }
+    // Xóa 1 danh sach sim
+    removeListSim = async (id) => {
+        if (sessionStorage.getItem("running") == 1) {
+            alert("Tiến trình đang chạy không được phép xóa")
+        }
+        else {
+            let removeList = []
+            if (typeof id === "string") {
+                removeList.push(id)
+            }
+            else removeList = [...id]
+            let config = {
+                headers: {
+                    "ids": removeList
+                }
+            }
+            console.log(removeList)
+            await axios.delete("http://localhost:8081/api/listsim", config)
+            alert("Xóa danh sách sim thành công !")
+            this.componentDidMount()
+        }
+    }
 
-    //Thêm 1 danh sách sim 
-    // addSimList = (name, file) => {
-    //     var formData = new FormData()
-    //     formData.append('file', file)
-    //     formData.append('name', name)
-    //     const config = {
-    //         headers: { 'content-type': 'multipart/form-data' }
-    //     }
-    //     console.log(formData.get('file'))
-    //     axios.post('http://localhost:8081/api/file', formData, {
-    //         headers: { 'content-type': 'multipart/form-data' }
-    //     })
-    //         .then((response) => {
-    //             alert('File uploaded successfully.');
-    //             this.componentDidMount()
-    //         })
-    //         .catch((error) => {
-    //             alert('Error uploading file.');
-    //         });
-    // }
+    // Thêm 1 danh sách sim 
+    addSimList = (name, file) => {
+        var formData = new FormData()
+        formData.append('file', file)
+        formData.append('name', name)
+        const config = {
+            headers: { 'content-type': 'multipart/form-data' }
+        }
+        console.log(formData.get('file'))
+        axios.post('http://localhost:8081/api/file', formData, {
+            headers: { 'content-type': 'multipart/form-data' }
+        })
+            .then((response) => {
+                alert('File uploaded successfully.');
+                this.componentDidMount()
+            })
+            .catch((error) => {
+                alert('Error uploading file.');
+            });
+    }
     // Hiển thị danh sách các danh sách sim
     removeMultiSimList = () => {
         if(sessionStorage.getItem("running") == 1) {
@@ -108,7 +109,7 @@ export class Simlist extends Component {
         }
     }
     fetchData = async () => {
-        let res = await axios.get("http://localhost:3000/listSim")
+        let res = await axios.get("http://localhost:8081/api/listsim")
         // 'http://localhost:8081/api/listsim'
         this.setState({
             listSim: res && res.data ? res.data : []
@@ -188,7 +189,7 @@ export class Simlist extends Component {
 
                                 Object.values(listSim).map((list, index) => {
                                     return (
-                                        <tr key={index}>
+                                        <tr key={list.id}>
                                             <td>
                                                 <input type="checkbox" name="" list_id={list.id}
                                                 />
@@ -206,7 +207,7 @@ export class Simlist extends Component {
                                                 <button className="action-btn remove-btn"
                                                     onClick={(e) => {
                                                         const checkbox = e.currentTarget.closest("tr").querySelector("input[type='checkbox']");
-                                                        this.removeListSim(checkbox.getAttribute("list_id"))
+                                                        if(window.confirm("Bạn có chắc chắn muốn xóa danh sách này ? ")) this.removeListSim(checkbox.getAttribute("list_id"))
                                                     }}
                                                 >
                                                     <FontAwesomeIcon icon={faTrashCan} style={{ color: "#cc3f3f" }} />
