@@ -9,8 +9,9 @@ export class Process extends Component {
     constructor() {
         super()
         // sessionStorage.setItem("processData", JSON.stringify([]))
+        // sessionStorage.setItem("currentSim", JSON.stringify(({})))
         this.state = {
-            currentSim: {},
+            // currentSim: {},
             intervalId: null,
             processData: localStorage.getItem("processData") == null ? [] : JSON.parse(localStorage.getItem("processData")) ,
             currentIcon: faCirclePause
@@ -52,6 +53,9 @@ export class Process extends Component {
         if (running == 1) {
             if (action != "finish")
                 this.changeIconPauseContinue()
+            else {
+                sessionStorage.setItem("running", 0)
+            }
             axios.get('http://localhost:8081/api/action?action=' + action)
                 .then(respone => {
                     console.log(respone)
@@ -66,10 +70,7 @@ export class Process extends Component {
         }))
     }
     componentDidMount = () => {
-        console.log(sessionStorage.getItem("running"))
         if (sessionStorage.getItem("running") == 1) {
-            console.log(1)
-            var currentProcess
             this.state.intervalId =
                 setInterval(() => {
                     axios.get('http://localhost:8081/api/process_current')
@@ -78,11 +79,11 @@ export class Process extends Component {
                     })
                     .then(respone => {
                         if (respone != null) {
+                            sessionStorage.setItem("currentSim", JSON.stringify(respone))
                             this.setState(prevState => ({
-                                currentSim: respone,
+                                // currentSim: respone,
                                 processData: this.addProcess(prevState.processData, respone)
                             }))
-                            // const process = 
                             localStorage.setItem("processData", JSON.stringify(this.state.processData))
                         }
                         console.log("this.state.currentProcess.check " + respone.check)
@@ -91,8 +92,7 @@ export class Process extends Component {
                             this.componentWillUnmount()
                             sessionStorage.setItem("running", 0)
                             sessionStorage.setItem("status", 1)
-                            localStorage.clear()
-                            sessionStorage.clear()
+                            // sessionStorage.clear()
                         }
                     })
 
@@ -104,25 +104,11 @@ export class Process extends Component {
     }
 
     render() {
-        const currentSim = { ...this.state.currentSim }
+        // const currentSim = { ...this.state.currentSim }
+        const currentSim = JSON.parse(sessionStorage.getItem("currentSim"))
         const processData = this.state.processData
         console.log(processData)
         const currentIcon = this.state.currentIcon
-        const processRun = () => {
-            if (sessionStorage.getItem("running") == 1) {
-                processData.map((sim, index) => {
-                    return (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{sim.current_phoneNumber}</td>
-                            <td>{sim.status ? sim.status : "Đang gửi tin nhắn"}</td>
-                            <td>{sim.message}</td>
-                        </tr>
-
-                    )
-                })
-            }
-        }
         // console.log(this.processData)
         return (
             <div className="process-container">
@@ -182,7 +168,7 @@ export class Process extends Component {
                         <div className="progress mt-2" style={{ padding: 0 }}>
                             <div
                                 className="progress-bar"
-                                style={{ width: currentSim.process }}
+                                style={{ width: currentSim!=null?currentSim.process:0}}
                                 role="progressbar"
                                 aria-valuenow={22}
                                 aria-valuemin={0}
@@ -190,7 +176,7 @@ export class Process extends Component {
                             >
                             </div>
                             <div className="progress-text" style={{ left: "50%" }}>
-                                <span>{`${currentSim.index?currentSim.index + "/":"" } `}</span><span>{currentSim.totalPhoneNumber}</span>
+                                <span>{`${currentSim!=null?currentSim.index + " /":"" } `}</span><span>{currentSim!=null?currentSim.totalPhoneNumber:""}</span>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, useState } from 'react'
 import './sass/simlist.scss';
 import '..//../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -25,46 +25,37 @@ export class Simlist extends Component {
         }
         this.updatedPhone = []
         this.removedListSim = []
+        this.listName = ""
     }
     // Hiện thị thông tin chi tiết 1 danh sách
-    showAddWindow = async (id) => {
+    showAddWindow = (id) => {
         if (sessionStorage.getItem("running") == 1) {
             alert("Tiến trình đang chạy không được phép sửa")
         }
         else {
             document.querySelector('.sub-container').style.display = 'block';
-            let res = await axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id);
+            axios.get("http://localhost:8081/api/phoneNumber/list?id=" + id)
             // 'http://localhost:8081/api/listsim?id=' + id
-            let data = res.data
-            this.setState({
-                variables: {
-                    openWindowObject: {
-                        id: data.id,
-                        name: data.name,
-                        listPhoneNumber: data.listPhoneNumber,
-                        note: data.note,
-                        updatedPhoneNumberList: [],
-                    },
-                }
+            .then(response => {
+                let data = response.data
+                this.listName = data.name
+                this.setState({
+                    variables: {
+                        openWindowObject: {
+                            id: data.id,
+                            name: data.name,
+                            listPhoneNumber: data.listPhoneNumber,
+                            note: data.note,
+                            updatedPhoneNumberList: [],
+                        },
+                    }
+                })
+                console.log("Name of list " + this.state.variables.openWindowObject.name)                                              
             })
         }
     }
     // Đóng cửa sổ thông tin chi tiết 1 danh sách
     hideAddWindow = () => {
-        this.setState(prevState => ({
-            variables: {
-                checkbox: true,
-                openWindowObject: {
-                    id: '',
-                    name: '',
-                    listPhoneNumber: [],
-                    note: '',
-                    updatedPhoneNumberList: [],
-                }
-            },
-            listSim: prevState.listSim
-        }))
-        this.updatedPhone = []
         document.querySelector('.sub-container').style.display = 'none';
     }
     //Tích chọn toàn bộ danh sách
@@ -106,6 +97,20 @@ export class Simlist extends Component {
             }
             console.log(removeList)
             await axios.delete("http://localhost:8081/api/listsim", config)
+            this.setState(prevState=>({
+                variables :{
+                    ...prevState.variables,
+                    openWindowObject:{
+                        id: '',
+                        name: '',
+                        listPhoneNumber: [],
+                        note: '',
+                        updatedPhoneNumberList: [],
+                    }
+                },
+                listSim : prevState.listSim
+            }))
+            this.listName = ""
             this.componentDidMount()
         }
     }
@@ -124,40 +129,57 @@ export class Simlist extends Component {
         }
         // console.log(this.updatedPhone)
     }
-    addNewPhoneToList = (content) => {
+    addNewPhoneToList = (list_id,content) => {
         if (content == "" || content.length != 9) {
             alert("Yêu cầu nhập lại số điện thoại")
         }
         else {
-            this.updatedPhone.push({
-                id: null,
-                phoneNumber: content
-            })
-            console.log(content)
-            this.setState(prevState => ({
-                variables: prevState.variables,
-                listSim: prevState.listSim,
-                addedPhoneNumber: content
-            }))
-            console.log(this.state.addedPhoneNumber)
-
+            let data = {
+                id: list_id,
+                listPhoneNumber :[
+                    {
+                        id: null,
+                        phoneNumber : content
+                    }
+                ]
+            }
+            console.log(data)
+            axios.put("http://localhost:8081/api/listsim", data)
+                .then((response) => {
+                    // let data = 
+                    // console.log("data \n")
+                    // console.log(data)
+                    this.setState(prevState => ({
+                        variables: {
+                            openWindowObject:{
+                                // ...prevState.variables.openWindowObject,
+                                name: prevState.variables.openWindowObject.name,
+                                listPhoneNumber : response.data
+                            }
+                        },
+                        // listSim : prevState.listSim
+                    }))
+                    console.log(this.state.variables.openWindowObject.listPhoneNumber)
+                    this.componentDidMount()
+                    // this.render()
+                })
         }
     }
     // Chỉnh sửa chi tiết 1 danh sách sim
-    updateSimList = async () => {
+    updateSimList = async (id,name,listPhoneNumber,note) => {
         const data = {
-            id: document.querySelector("input[name='id']").defaultValue,
-            name: document.querySelector("input[name='listName']").value,
-            listPhoneNumber: this.updatedPhone,
-            note: document.querySelector('textarea').value
+            id,
+            name : this.listName,
+            listPhoneNumber,
+            note
         }
-
+        console.log("Test data" + JSON.stringify(data))
         await axios.put("http://localhost:8081/api/listsim", data)
             .then((response) => {
                 console.log(response)
+                this.hideAddWindow()
+                this.componentDidMount()
             })
-        this.hideAddWindow()
-        this.componentDidMount()
         console.log(data)
     }
     //Thêm 1 danh sách sim 
@@ -210,14 +232,16 @@ export class Simlist extends Component {
     }
     render() {
         const listSim = { ...this.state.listSim }
-        const listSimCunrrentOpen = { ...this.state.variables.openWindowObject }
-        const addedPhoneNumber = this.state.addedPhoneNumber
+        const listSimCunrrentOpen = this.state.variables.openWindowObject
+        console.log("Name of list number " + listSimCunrrentOpen.name)
         const addPhone = (phone) => {
             if (phone != "") return (
                 <tr>
                     <td></td>
                     <td>
-                        <input type="tel" name="" id="" defaultValue={addedPhoneNumber} />
+                        <input type="tel" name="" id="" 
+                        // defaultValue={addedPhoneNumber} 
+                        />
                     </td>
                     <td>
                         <button className="action-btn remove-btn"
@@ -354,6 +378,9 @@ export class Simlist extends Component {
                                 name="listName"
                                 defaultValue={listSimCunrrentOpen.name}
                                 placeholder="Điền tên danh sách...."
+                                onBlur ={(e)=>{
+                                    this.listName = e.target.value
+                                }}
                             />
                         </div>
                         <div className="editCard-list">
@@ -366,11 +393,13 @@ export class Simlist extends Component {
                                     type="text"
                                     name="listNumber"
                                     defaultValue=""
+                                    id='newPhoneNumber'
                                     placeholder="Thêm mới sim tại đây...."
                                 />
                                 <button
                                     onClick={() => {
-                                        this.addNewPhoneToList(document.querySelector("input[name='listNumber']").value)
+                                        this.addNewPhoneToList(listSimCunrrentOpen.id,document.querySelector("input[name='listNumber']").value)
+                                        document.querySelector("#newPhoneNumber").value = ""
                                     }}
                                 >
                                     <FontAwesomeIcon icon={faPlus} style={{ color: "#ffffff" }} /> Thêm
@@ -429,7 +458,15 @@ export class Simlist extends Component {
                             <textarea name="note" id="note" rows={10} defaultValue={listSimCunrrentOpen.note} />
                         </div>
                         <div className="editCard-save">
-                            <button onClick={this.updateSimList}>
+                            <button 
+                            onClick={()=>{
+                                const id=  document.querySelector("input[name='id']").defaultValue
+                                const name =  document.querySelector("input[name='listName']").value
+
+                                const listPhoneNumber =   this.updatedPhone
+                                const note = document.querySelector('textarea').value
+                                this.updateSimList(id,name,listPhoneNumber,note)
+                            }}>
                                 <FontAwesomeIcon icon={faFloppyDisk} style={{ color: "#ffffff" }} />{" "}
                                 Lưu
                             </button>

@@ -12,6 +12,7 @@ export class Mailbox extends Component {
             listMails: [],
             intervalId: null
         }
+        // localStorage.clear()
         // this.intervalId = null
     }
     // Effect for input
@@ -35,7 +36,7 @@ export class Mailbox extends Component {
     }
     // Get the mail
     componentDidMount = () =>{
-        this.state.intervalId = setInterval(()=> this.findMailsByCondition("","",""),5*1000)
+        this.state.intervalId = setInterval(()=> this.findMailsByCondition("","",""),10*1000)
     }
     componentWillUnmount = () => {
         clearInterval(this.state.intervalId)

@@ -19,6 +19,8 @@ export class Config extends Component {
                 sessionStorage.setItem("idConfig", response.data)
                 console.log(response.data)
                 alert("Lưu cấu hình thành công")
+                this.componentDidMount()
+                document.getElementById("newProfile").value = ""
             })
     }
     fillSimListSelection = async ()=>{
@@ -142,12 +144,14 @@ export class Config extends Component {
                             onClick={(e)=>{
                                 e.preventDefault();
                                 localStorage.clear()
+                                sessionStorage.clear()
                                 let profilePath = document.getElementById("Profile-Path").value
                                 let idListSim = document.getElementById("select-sim").value
                                 let newProfilePath = document.getElementById("newProfile").value
                                 if(newProfilePath!='' ){
                                     console.log("newProfilePath " + newProfilePath)
                                     this.addConfigInfo(-1, "", newProfilePath)
+                                    
                                 }
                                 else{
                                     console.log("profilePath" + profilePath)
