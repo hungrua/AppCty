@@ -10,7 +10,8 @@ export class Config extends Component {
         this.apiKey = ""
         this.state ={
             listSim: [],
-            listProFile:[]
+            listProFile:[],
+            profile: ""
         }
     }
     addConfigInfo= async (profilePath,idListSim,newProfilePath)=>{
@@ -19,6 +20,7 @@ export class Config extends Component {
                 sessionStorage.setItem("idConfig", response.data)
                 console.log(response.data)
                 alert("Lưu cấu hình thành công")
+                this.componentDidMount()
             })
     }
     fillSimListSelection = async ()=>{
@@ -38,6 +40,7 @@ export class Config extends Component {
         this.setState({listProFile:listProFile})
     }
     componentDidMount = async () =>{
+        document.getElementById("newProfile").value = ""
         await this.fillProFileSelection()
         await this.fillSimListSelection()
         if(sessionStorage.getItem("running")==1){
@@ -141,7 +144,6 @@ export class Config extends Component {
                             <button type="submit" className="button-submit br" id="save-config"
                             onClick={(e)=>{
                                 e.preventDefault();
-                                localStorage.clear()
                                 let profilePath = document.getElementById("Profile-Path").value
                                 let idListSim = document.getElementById("select-sim").value
                                 let newProfilePath = document.getElementById("newProfile").value
@@ -154,6 +156,7 @@ export class Config extends Component {
                                     console.log("idListSim" + idListSim)
                                     if(profilePath != '' && idListSim != ''){
                                         this.addConfigInfo(profilePath,idListSim,"")
+                                        localStorage.clear()
                                     }
                                     else alert("Vui lòng chọn đủ thông tin")
                                 }

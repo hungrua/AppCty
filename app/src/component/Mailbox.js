@@ -35,7 +35,7 @@ export class Mailbox extends Component {
     }
     // Get the mail
     componentDidMount = () =>{
-        this.state.intervalId = setInterval(()=> this.findMailsByCondition("","",""),5*1000)
+        this.state.intervalId = setInterval(()=> this.findMailsByCondition("","",""),3*1000)
     }
     componentWillUnmount = () => {
         clearInterval(this.state.intervalId)

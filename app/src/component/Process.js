@@ -10,7 +10,7 @@ export class Process extends Component {
         super()
         // sessionStorage.setItem("processData", JSON.stringify([]))
         this.state = {
-            currentSim: {},
+            currentSim: localStorage.getItem("currentSim") == null ? {} : JSON.parse(localStorage.getItem("currentSim")),
             intervalId: null,
             processData: localStorage.getItem("processData") == null ? [] : JSON.parse(localStorage.getItem("processData")) ,
             currentIcon: faCirclePause
@@ -32,6 +32,7 @@ export class Process extends Component {
             try {
                 idConfig = parseInt(idConfig, 10)
                 localStorage.clear()
+                console.log("idConfig = " + idConfig)
                 axios.get('http://localhost:8081/api/play?idConfig=' + idConfig)
                     .then(respone => {
                         console.log(respone.data)
@@ -68,8 +69,6 @@ export class Process extends Component {
     componentDidMount = () => {
         console.log(sessionStorage.getItem("running"))
         if (sessionStorage.getItem("running") == 1) {
-            console.log(1)
-            var currentProcess
             this.state.intervalId =
                 setInterval(() => {
                     axios.get('http://localhost:8081/api/process_current')
@@ -84,19 +83,17 @@ export class Process extends Component {
                             }))
                             // const process = 
                             localStorage.setItem("processData", JSON.stringify(this.state.processData))
+                            localStorage.setItem("currentSim", JSON.stringify(respone))
                         }
-                        console.log("this.state.currentProcess.check " + respone.check)
                         if (respone.check == true) {
                             alert("Tiến trình đã hoàn thành!!")
                             this.componentWillUnmount()
                             sessionStorage.setItem("running", 0)
                             sessionStorage.setItem("status", 1)
-                            localStorage.clear()
                             sessionStorage.clear()
                         }
                     })
-
-                }, 3 * 1000)
+                },1000)
         }
     }
     componentWillUnmount = () => {
@@ -104,9 +101,9 @@ export class Process extends Component {
     }
 
     render() {
-        const currentSim = { ...this.state.currentSim }
+        const currentSim = {...this.state.currentSim}
         const processData = this.state.processData
-        console.log(processData)
+        console.log( currentSim)
         const currentIcon = this.state.currentIcon
         const processRun = () => {
             if (sessionStorage.getItem("running") == 1) {
