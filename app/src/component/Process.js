@@ -67,7 +67,6 @@ export class Process extends Component {
         }))
     }
     componentDidMount = () => {
-        console.log(sessionStorage.getItem("running"))
         if (sessionStorage.getItem("running") == 1) {
             this.state.intervalId =
                 setInterval(() => {
@@ -81,7 +80,6 @@ export class Process extends Component {
                                 currentSim: respone,
                                 processData: this.addProcess(prevState.processData, respone)
                             }))
-                            // const process = 
                             localStorage.setItem("processData", JSON.stringify(this.state.processData))
                             localStorage.setItem("currentSim", JSON.stringify(respone))
                         }
@@ -93,7 +91,7 @@ export class Process extends Component {
                             sessionStorage.clear()
                         }
                     })
-                },1000)
+                },3 * 1000)
         }
     }
     componentWillUnmount = () => {
